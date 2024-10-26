@@ -12,6 +12,8 @@ services:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       timeout: 20s
       retries: 10
+    volumes:
+      - ./mysql-data:/var/lib/mysql
   # redis for caching
   redis:
     image: redis:latest
@@ -38,7 +40,7 @@ services:
     env_file:
       - .env
     volumes:
-      - ./appdata:/mycloud-appdata
+      - ./appdata:/app/mycloud-appdata
   # nginx to combine frontend and backend to a single domain
   nginx:
     build: .

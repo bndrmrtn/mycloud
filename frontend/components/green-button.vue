@@ -1,5 +1,5 @@
 <template>
-  <button :disabled="loading" class="transition w-full py-2 px-4 rounded-lg bg-gray-100 hover:bg-gray-200 focus:bg-gray-200/10 border border-gray-200 text-gray-500 disabled:text-gray-400 fredoka">
+  <button :disabled="loading" class="transition py-1.5 px-4 rounded-lg bg-theme border border-theme text-black disabled:text-gray-800 fredoka">
     <slot/>
     <spinner-icon v-if="loading" />
   </button>

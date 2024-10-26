@@ -9,7 +9,7 @@ import (
 
 func GoogleOAuth() oauth2.Config {
 	return oauth2.Config{
-		RedirectURL:  "http://localhost:3001/auth",
+		RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
 		ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
 		ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		Scopes: []string{

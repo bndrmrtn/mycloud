@@ -7,6 +7,19 @@
 </template>
 
 <script setup lang="ts">
-useHead({
+import {onMounted} from "vue";
+import {useAuthStore} from "~/stores/auth";
+import {useRoute} from "#app";
+
+useHead({})
+const env = useRuntimeConfig()
+
+const route = useRoute()
+const auth = useAuthStore()
+
+onMounted(async () => {
+  await auth.handle(env.public.api)
 })
+
+watch(() => route.fullPath, () => auth.handle(env.public.api).then(() => console.log('Checking auth state')))
 </script>

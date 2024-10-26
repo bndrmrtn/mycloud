@@ -8,16 +8,23 @@
         </div>
         <img src="../assets/images/cloud.svg" class="w-16 svg-img" alt="Cloud Image">
       </div>
-      <theme-button class="mt-3" :loading="progress" @click="request">
+      <theme-button v-if="!auth.isLoggedIn" class="mt-3" :loading="progress" @click="request">
         Login
       </theme-button>
+      <theme-link v-else to="/spaces" :loading="false">
+        Spaces
+      </theme-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import {useAuthStore} from "#imports";
+import ThemeLink from "~/components/theme-link.vue";
+
 const progress = ref(false)
 
+const auth = useAuthStore()
 const env = useRuntimeConfig().public
 
 const request = async () => {
@@ -25,10 +32,10 @@ const request = async () => {
   try {
     const res = await fetch(env.api + '/auth-redirect')
     const data = await res.json() as {redirect_url: string}
-    console.log(data)
-    // window.location.href = data.redirect_url
+    window.location.href = data.redirect_url
   } catch(e: unknown) {
     console.error(e)
+    alert('Failed to create authentication url')
   } finally {
     progress.value = false
   }
