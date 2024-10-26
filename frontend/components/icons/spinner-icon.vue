@@ -1,0 +1,3 @@
+<template>
+  <svg class="svg-icon animate-spin" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h256v256H0z"></path><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="16" d="M128 32v32M195.9 60.1l-22.6 22.6M224 128h-32M195.9 195.9l-22.6-22.6M128 224v-32M60.1 195.9l22.6-22.6M32 128h32M60.1 60.1l22.6 22.6" class="stroke-000000"></path></svg>
+</template>

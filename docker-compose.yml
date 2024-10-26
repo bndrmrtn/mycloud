@@ -1,0 +1,54 @@
+services:
+  database:
+    image: mysql:latest
+    container_name: mycloud-db
+    restart: always
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: true
+      MYSQL_USER: mycloud
+      MYSQL_PASSWORD: password
+      MYSQL_DATABASE: mycloud
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+  # redis for caching
+  redis:
+    image: redis:latest
+    container_name: mycloud-redis
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+  # nuxt frontend
+  frontend:
+    build:
+      context: ./frontend
+    container_name: mycloud-nuxt
+    restart: always
+    environment:
+      TZ: "Europe/Budapest"
+  # file mannager api
+  backend:
+    build:
+      context: ./backend
+    depends_on:
+      database:
+        condition: service_healthy
+    container_name: mycloud-api
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./appdata:/mycloud-appdata
+  # nginx to combine frontend and backend to a single domain
+  nginx:
+    build: .
+    container_name: mycloud-nginx
+    ports:
+      - 3000:80
+    depends_on:
+      - frontend
+      - backend
+    links:
+      - frontend
+      - backend
+    restart: always
