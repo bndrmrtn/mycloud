@@ -4,16 +4,16 @@ export interface Space {
     size: number
 }
 
-export interface File {
+export interface SpaceFile {
     id: string
     directory: string
     file_name: string
     fileinfo: {
-        info: FileInfo
+        info: SpaceFileInfo
     }
 }
 
-export interface FileInfo {
+export interface SpaceFileInfo {
     id: string
     extension: string
     type: string

@@ -19,7 +19,10 @@ func NewApiServer(db *gorm.DB, store bolt.SessionStore, svc services.StorageServ
 	ws := NewWSServer(app, db)
 
 	registerValidators(app.CompleteRouter)
-	registerRoutes(app.Group("/", middlewares.CORSMiddleware), db, store, svc, ws)
+	app.Hook(bolt.PreRequestHook, func(c bolt.Ctx) {
+		middlewares.CORSMiddleware(c)
+	})
+	registerRoutes(app, db, store, svc, ws)
 
 	return app
 }
@@ -43,7 +46,8 @@ func registerRoutes(r bolt.Router, db *gorm.DB, store bolt.SessionStore, svc ser
 	// TODO: Go Bolt does not chain middlewares with groups
 	spaces := r.Group("/spaces/{space_id@uuid}", middlewares.AuthMiddleware(db), middlewares.SpaceMiddleware(db, "space_id"))
 	{
-		spaces.Get("/", handlers.HandleGetFiles(db)).Name("spaces.files")
+		spaces.Get("/", handlers.HandleGetSpace(db)).Name("spaces.get")
+		spaces.Get("/files", handlers.HandleGetFiles(db)).Name("spaces.files")
 		spaces.Get("/fs", handlers.HandleGetFS(db))
 		spaces.Get("/download", handlers.HandleDownloadDir(db, svc, ws))
 

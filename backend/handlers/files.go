@@ -11,6 +11,16 @@ import (
 	"gorm.io/gorm"
 )
 
+func HandleGetSpace(db *gorm.DB) bolt.HandlerFunc {
+	return func(c bolt.Ctx) error {
+		space, err := ctxSpace(c)
+		if err != nil {
+			return err
+		}
+		return c.JSON(space)
+	}
+}
+
 func HandleGetFiles(db *gorm.DB) bolt.HandlerFunc {
 	return func(c bolt.Ctx) error {
 		path := queryPath(c)

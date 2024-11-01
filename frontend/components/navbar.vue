@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import {useAuthStore} from "~/stores/auth";
+import {useRoute} from "#app";
 
 const open = ref(false)
 const env = useRuntimeConfig()
+const route = useRoute()
 
 const auth = useAuthStore()
+
+const getLinkClass = (path: string): string => {
+  if(path.endsWith('*') && route.path.startsWith(path.slice(0, -1))) return 'activeLink'
+  if(path == route.path) return 'activeLink'
+  return 'inactiveLink'
+}
 </script>
 
 <template>
@@ -16,7 +24,7 @@ const auth = useAuthStore()
       </RouterLink>
       <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
         <div v-if="auth.isLoggedIn" class="flex items-center space-x-1.5 hover:bg-gray-100 rounded-lg p-2">
-          <img v-if="!!auth.user?.image" class="w-6 h-6 rounded-lg" :src="`${env.public.api}/profileimage/${auth.user?.image}`" alt="User Image" />
+          <img v-if="auth.user?.image_url != ''" class="w-6 h-6 rounded-lg" :src="`${env.public.api}/profileimage/${auth.user?.image_url}`" alt="User Image" />
           <p class="fredoka">{{ auth.user?.name }}</p>
         </div>
         <div v-else class="flex items-center space-x-1.5 hover:bg-gray-100 rounded-lg p-2">
@@ -32,10 +40,10 @@ const auth = useAuthStore()
       <div :class="{'hidden': !open}" class="fredoka items-center justify-between w-full md:flex md:w-auto md:order-1" id="navbar-sticky">
         <ul class="flex flex-col p-4 md:p-0 mt-4 font-medium md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0">
           <li>
-            <RouterLink to="/" class="activeLink" aria-current="page">Home</RouterLink>
+            <RouterLink to="/" :class="getLinkClass('/')" aria-current="page">Home</RouterLink>
           </li>
           <li v-if="auth.isLoggedIn">
-            <RouterLink to="/spaces" class="inactiveLink">Spaces</RouterLink>
+            <RouterLink to="/spaces" :class="getLinkClass('/spaces*')">Spaces</RouterLink>
           </li>
         </ul>
       </div>

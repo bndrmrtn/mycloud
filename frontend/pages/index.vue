@@ -21,16 +21,16 @@
 <script setup lang="ts">
 import {useAuthStore} from "#imports";
 import ThemeLink from "~/components/theme-link.vue";
+import {apiFetch} from "~/scripts/request";
 
 const progress = ref(false)
 
 const auth = useAuthStore()
-const env = useRuntimeConfig().public
 
 const request = async () => {
   progress.value = true
   try {
-    const res = await fetch(env.api + '/auth-redirect')
+    const res = await apiFetch('/auth-redirect')
     const data = await res.json() as {redirect_url: string}
     window.location.href = data.redirect_url
   } catch(e: unknown) {

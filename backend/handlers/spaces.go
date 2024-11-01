@@ -10,7 +10,7 @@ import (
 )
 
 type CreateSpacesRequest struct {
-	Name string
+	Name string `json:"name"`
 }
 
 func HandleCreateSpace(db *gorm.DB) bolt.HandlerFunc {

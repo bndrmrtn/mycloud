@@ -3,5 +3,5 @@ export interface User {
     g_id: string
     name: string
     email: string
-    image: string
+    image_url: string
 }

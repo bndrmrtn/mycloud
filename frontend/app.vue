@@ -11,15 +11,16 @@ import {onMounted} from "vue";
 import {useAuthStore} from "~/stores/auth";
 import {useRoute} from "#app";
 
-useHead({})
-const env = useRuntimeConfig()
+useHead({
+  title: ''
+})
 
 const route = useRoute()
 const auth = useAuthStore()
 
 onMounted(async () => {
-  await auth.handle(env.public.api)
+  await auth.handle()
 })
 
-watch(() => route.fullPath, () => auth.handle(env.public.api).then(() => console.log('Checking auth state')))
+watch(() => route.fullPath, () => auth.handle().then(() => console.log('Checking auth state')))
 </script>

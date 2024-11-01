@@ -12,10 +12,10 @@ import SpinnerIcon from "~/components/icons/spinner-icon.vue";
 import {onMounted} from "vue";
 import {useRoute, useRouter} from "#app";
 import type {User} from "~/types/user";
+import {apiFetch} from "~/scripts/request";
 
 const router = useRouter()
 const route = useRoute()
-const env = useRuntimeConfig().public
 
 onMounted(async () => {
   let q = ""
@@ -24,9 +24,9 @@ onMounted(async () => {
     q += `${key}=${route.query[key]}&`
   })
 
-  const url = env.api + '/gauth?' + q.substring(0, q.length-1)
+  const url = '/gauth?' + q.substring(0, q.length-1)
   try {
-    const res = await fetch(url)
+    const res = await apiFetch(url)
     const data = await res.json() as {user: User}
     useAuthStore().user = data.user
     await router.push('/')

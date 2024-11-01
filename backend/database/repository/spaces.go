@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"strings"
-
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"gorm.io/gorm"
 )
@@ -33,9 +31,14 @@ func GetAllSpaceFiles(db *gorm.DB, spaceID string, dir string) ([]models.File, e
 
 func GetSpaceFS(db *gorm.DB, spaceID string, dir string) ([]string, error) {
 	var files []string
-	result := db.Model(&models.File{}).Select("distinct directory").
-		Where(strings.TrimSpace(`file_space_id = ? and directory like ?`), spaceID, dir+"%").
-		Order("directory asc").
-		Find(&files)
+	result := db.Raw(`
+		SELECT DISTINCT
+            SUBSTRING_INDEX(SUBSTRING_INDEX(directory, '/', LENGTH(TRIM(TRAILING '/' FROM ?)) - LENGTH(REPLACE(TRIM(TRAILING '/' FROM ?), '/', '')) + 2), '/', -1) AS next_directory
+        FROM files
+        WHERE directory LIKE CONCAT(TRIM(TRAILING '/' FROM ?), '/%')
+            AND directory != '/'
+            AND file_space_id = ?
+            AND LENGTH(TRIM(TRAILING '/' FROM ?)) < LENGTH(REPLACE(TRIM(TRAILING '/' FROM directory), '/', ''));
+		`, dir, dir, dir, spaceID, dir).Find(&files)
 	return files, result.Error
 }
