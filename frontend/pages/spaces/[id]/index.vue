@@ -55,13 +55,30 @@ watch(route, () => {
     fetchFiles()
     fetchDirs()
 })
+
+const downloading = ref(false)
+
+const download = async () => {
+  downloading.value = true
+  try {
+    await apiFetch(`/spaces/${id}/download?path=${route.query['dir'] || '/'}`)
+  } catch(e: unknown) {
+    console.error(e)
+  } finally {
+    downloading.value = false
+  }
+}
 </script>
 
 <template>
   <div class="px-10 py-5 max-w-screen-md mx-auto">
     <h1 class="fredoka text-3xl">Space:</h1>
+    <div class="w-full bg-gray-100 rounded-lg my-2 py-3 px-4 flex items-center justify-between">
+      <green-link :to="`/spaces/${id}/upload`">Upload a new file</green-link>
+      <green-button :loading="downloading" @click="download">Download directory as zip</green-button>
+    </div>
     <p class="my-2 text-sm text-gray-700">Path: <span class="px-1 py-0.5 rounded bg-gray-100">{{ route.query['dir'] || '/' }}</span></p>
-    <ul class="border rounded-lg mt-5">
+    <ul class="border rounded-lg my-5">
       <li v-if="route.query['dir']" class="flex items-center space-x-3 py-2 px-4 hover:bg-gray-100 transition rounded-t-lg border-b">
         <folder-icon class="text-gray-600" />
         <RouterLink class="w-full" :to="`/spaces/${route.params?.id}`">..</RouterLink>
@@ -100,5 +117,6 @@ watch(route, () => {
         </div>
       </li>
     </ul>
+    <p v-if="dirs.length == 0 && files.length == 0">No files yet.</p>
   </div>
 </template>
