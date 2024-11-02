@@ -1,52 +1,52 @@
 <script setup lang="ts">
+import {onMounted, useLoaderStore} from "#imports";
 import type {Space} from "~/types/space";
-import {onMounted} from "vue";
-import {apiFetch} from "~/scripts/request";
+import {useToast} from "vue-toastification";
+import {fetchSpaces} from "~/scripts/fetch-spaces";
+import {useRouter} from "#app";
+import prettyBytes from "pretty-bytes";
+import SpaceLayout from "~/layouts/space-layout.vue";
 
+definePageMeta({
+  middleware: ['auth'],
+})
+
+const router = useRouter()
+const { warning } = useToast()
 const spaces = ref<Array<Space>>([])
 
-const load = async () => {
-  spaces.value = []
-  try {
-    const res = await apiFetch('/spaces')
-    const data = await res.json()
-    spaces.value = data as Array<Space>
-  } catch (e: unknown) {
-    console.error(e)
-    alert('Failed to load your spaces')
-  }
+const fetchData = async () => {
+  const data = await fetchSpaces()
+  if(data) return spaces.value = data
+
+  warning('Failed to load your spaces.')
+  await router.push('/')
 }
 
-onMounted(load)
-
-const create = () => {
-  const val = prompt('Enter your space name:')
-  if(!val) return alert('No value')
-
-  apiFetch('/spaces', {
-    method: 'POST',
-    body: JSON.stringify({name: val})
-  }).then(load)
-}
+onMounted(async () => {
+  await fetchData()
+  useLoaderStore().finish()
+})
 </script>
 
 <template>
-  <div class="px-10 py-5 max-w-screen-md mx-auto">
-    <div class="flex items-center justify-between">
-      <h1 class="fredoka text-3xl mb-5">Spaces</h1>
-      <green-button @click="create">Create</green-button>
-    </div>
-
-    <div v-for="(space, i) in spaces" :key="i" class="bg-gray-100 rounded border border-gray-200 py-2 px-4 mt-3 flex items-center justify-between">
-      <div>
-        <h2 class="fredoka">{{ i }} - {{ space.name }}</h2>
-        <p>Size: {{ space.size }}mb</p>
+  <SpaceLayout>
+      <div class="flex items-center justify-between">
+        <h1 class="fredoka text-3xl mb-5">Spaces</h1>
+        <buttons-button-pinkle class="!w-min">Create</buttons-button-pinkle>
       </div>
-      <green-link :to="`/spaces/${space.id}`">Open</green-link>
-    </div>
 
-    <div v-if="spaces.length == 0">
-      <p>You have no spaces yet.</p>
-    </div>
-  </div>
+      <ul class="mt-5">
+        <li
+            class="w-full bg-widget py-3 px-4 rounded-lg drop-shadow-sm flex items-center justify-between mb-3"
+            v-for="space in spaces" :key="space.id"
+        >
+          <div>
+            <h2 class="fredoka">{{ space.name }}</h2>
+            <p class="text-gray-400">Size: {{ prettyBytes(space.size) }}</p>
+          </div>
+          <buttons-button-bluish :to="`/spaces/${space.id}`" class="!w-min">Open</buttons-button-bluish>
+        </li>
+      </ul>
+  </SpaceLayout>
 </template>

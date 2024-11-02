@@ -1,26 +1,37 @@
 <template>
-    <NuxtRouteAnnouncer />
-    <Navbar/>
-    <main class="min-h-[calc(100vh-var(--nav-height))] mt-[var(--nav-height)] relative w-full">
-      <NuxtPage />
-    </main>
+  <LoaderUtil v-if="loader.loading" />
+  <NuxtLayout>
+    <FadeTransition>
+      <main class="text-black dark:text-white max-w-full min-h-screen" v-show="!loader.loading">
+        <NuxtPage/>
+      </main>
+    </FadeTransition>
+  </NuxtLayout>
 </template>
 
 <script setup lang="ts">
-import {onMounted} from "vue";
-import {useAuthStore} from "~/stores/auth";
-import {useRoute} from "#app";
+import LoaderUtil from '~/components/utils/loader-util.vue'
+import {useLoaderStore} from "~/stores/loader";
+import {onMounted} from "#imports";
+import FadeTransition from "~/components/transitions/fade-transition.vue";
 
-useHead({
-  title: ''
-})
-
-const route = useRoute()
-const auth = useAuthStore()
+const loader = useLoaderStore()
 
 onMounted(async () => {
-  await auth.handle()
+  await useAuthStore().handle()
+  loader.finish()
 })
 
-watch(() => route.fullPath, () => auth.handle().then(() => console.log('Checking auth state')))
+addRouteMiddleware('global-loader', () => loader.start(), { global: true })
+
+useHead({
+  title: 'MyCloud - Easy to use, web driven filesystem',
+  bodyAttrs: {
+    class: 'bg-main-from bg-gradient-to-bl from-main-from to-main-to text-white',
+  }
+})
+
+useSeoMeta({
+
+})
 </script>

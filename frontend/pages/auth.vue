@@ -1,23 +1,14 @@
-<template>
-   <div class="min-h-[calc(100vh-var(--nav-height))] flex items-center justify-center w-full">
-     <h1 class="text-4xl md:text-5xl fredoka text-gray-800">
-       Verifying login
-       <spinner-icon class="!w-8 !h-8" />
-     </h1>
-  </div>
-</template>
-
 <script setup lang="ts">
-import SpinnerIcon from "~/components/icons/spinner-icon.vue";
-import {onMounted} from "vue";
-import {useRoute, useRouter} from "#app";
+import {newRequest} from "~/scripts/request";
 import type {User} from "~/types/user";
-import {apiFetch} from "~/scripts/request";
+import SpinnerIcon from "~/components/icons/spinner-icon.vue";
+import {useLoaderStore} from "#imports";
 
 const router = useRouter()
 const route = useRoute()
 
 onMounted(async () => {
+  useLoaderStore().finish()
   let q = ""
   Object.keys(route.query).forEach(key => {
     console.log(key)
@@ -26,7 +17,7 @@ onMounted(async () => {
 
   const url = '/gauth?' + q.substring(0, q.length-1)
   try {
-    const res = await apiFetch(url)
+    const res = await newRequest(url)
     const data = await res.json() as {user: User}
     useAuthStore().user = data.user
     await router.push('/')
@@ -36,3 +27,14 @@ onMounted(async () => {
   }
 })
 </script>
+
+<template>
+  <div class="min-h-screen flex items-center justify-center bg-square">
+    <div class="px-5">
+      <h1 class="text-3xl md:text-5xl text-center inter font-bold leading-snug drop-shadow">
+        <span class="text-green-300">Verifying login</span>
+        <SpinnerIcon class="!w-7 !h-7 ml-2" />
+      </h1>
+    </div>
+  </div>
+</template>

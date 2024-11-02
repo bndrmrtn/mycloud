@@ -1,28 +1,33 @@
-@import './tailwind.css';
 @import './fonts.css';
-@import './vars.css';
+@import './tailwind.css';
+@import './bgs.css';
 
-.fredoka {
-    font-family: Fredoka One, cursive !important;
-}
-
-body {
-    font-family: 'Inter', sans-serif;
-    font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    font-variation-settings: 'slnt' 0;
-}
-
-.svg-img {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
-    -ms-overflow-style: none;
-    pointer-events: none;
+svg {
+     display: inline-block;
 }
 
 .svg-icon {
-    @apply w-4 h-4 inline-block
+     @apply w-4 h-5 inline-block;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+textarea:-webkit-autofill:hover,
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill,
+select:-webkit-autofill:hover,
+select:-webkit-autofill:focus {
+     background: #282c4f;
+     @apply bg-input border-emerald-400;
+}
+
+
+.no-select {
+     -webkit-touch-callout: none;
+     -webkit-user-select: none;
+     -moz-user-select: none;
+     -ms-user-select: none;
+     user-select: none;
 }

@@ -1,6 +1,6 @@
-export const apiFetch = (path: string, init: RequestInit|undefined = undefined) => {
-    if(!path.startsWith('/')) path = '/' + path
-    if(!init) init = { credentials: 'include' }
-    else init.credentials = 'include'
-    return fetch(`${useRuntimeConfig().public.api}${path}`, init)
+export const newRequest = (path: string, init: RequestInit = {}) => {
+     if(!path.startsWith('/')) path = '/' + path
+     path = useRuntimeConfig().public.api + path
+     if(!init.credentials) init.credentials = 'include'
+     return fetch(path, init)
 }

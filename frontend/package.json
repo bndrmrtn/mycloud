@@ -11,9 +11,9 @@
     "start": "PORT=4000 node .output/server/index.mjs"
   },
   "dependencies": {
-    "@pinia/nuxt": "^0.5.5",
+    "@pinia/nuxt": "^0.6.1",
     "nuxt": "^3.13.2",
-    "pinia": "^2.2.4",
+    "pinia": "^2.2.5",
     "pretty-bytes": "^6.1.1",
     "vue": "latest",
     "vue-router": "latest",

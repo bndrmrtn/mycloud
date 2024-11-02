@@ -1,7 +1,7 @@
 import {defineStore} from "pinia";
 import type {User} from "~/types/user";
 import {computed} from "vue";
-import {apiFetch} from "~/scripts/request";
+import {newRequest} from "~/scripts/request";
 
 export const useAuthStore = defineStore('auth', () => {
     const user = ref<User|null>(null)
@@ -14,7 +14,7 @@ export const useAuthStore = defineStore('auth', () => {
 
     const handle = async () => {
         try {
-            const res = await apiFetch(`/me`)
+            const res = await newRequest(`/me`)
             if(res.status != 200) return
             const data = await res.json()
             user.value = data as User

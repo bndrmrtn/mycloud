@@ -11,7 +11,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        theme: '#c0ff9e'
+         main: {
+          from: "#353a65",
+          to: "#333862",
+        },
+        input: "#282c4f",
+        widget: "#3c416e",
       },
     },
   },

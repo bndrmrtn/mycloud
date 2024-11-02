@@ -1,13 +1,40 @@
 <script setup lang="ts">
-import {useRoute} from "#app";
-import {apiFetch} from "~/scripts/request";
+import SpaceLayout from "~/layouts/space-layout.vue";
+import {onMounted, useLoaderStore} from "#imports";
+import {useRoute, useRouter} from "#app";
+import type {Space} from "~/types/space";
+import {fetchSpace} from "~/scripts/fetch-spaces";
+import {useToast} from "vue-toastification";
+import InputUtil from "~/components/utils/input-util.vue";
+import {newRequest} from "~/scripts/request";
 
 const route = useRoute()
-const id = route.params.id as string
+const router = useRouter()
+const loader = useLoaderStore()
 
-const dir = ref('')
+const id = route.params.id as string
+const space = ref<Space | null>(null)
+const { warning, success } = useToast()
+
+const fetchSpaceName = async () => {
+  space.value = await fetchSpace(id)
+  if(!space.value) {
+    warning('Failed to fetch space')
+    await router.push('/spaces')
+  }
+}
+
+onMounted(async () => {
+  await fetchSpaceName()
+  loader.finish()
+})
+
+const filePath = ref('')
 const fileName = ref('')
 const fileData = ref<File|null>(null)
+
+const uploadFileEl = ref(null)
+const processing = ref(false)
 
 const uploadFile = (e: Event) => {
   const input = e.target as HTMLInputElement
@@ -18,45 +45,54 @@ const uploadFile = (e: Event) => {
   fileData.value = files[0]
 }
 
-const processing = ref(false)
 const upload = async () => {
   if(!fileData.value) return
   processing.value = true
   const data = new FormData()
   data.append('file', fileData.value)
-  if(dir.value != '') data.append('directory', dir.value)
-  if(fileName.value) data.append('filename', fileName.value)
+  if(filePath.value != '') data.append('directory', filePath.value)
+  if(fileName.value) {
+    if(!fileName.value.startsWith('/')) fileName.value = '/' + fileName.value
+    data.append('filename', fileName.value)
+  }
+
 
   try {
-    await apiFetch(`/spaces/${id}/upload`, {
+    await newRequest(`/spaces/${id}/upload`, {
       method: 'POST',
       body: data,
     })
-    alert('Successfully uploaded')
+    success('Successfully uploaded')
   } catch (e: unknown) {
     console.error(e)
+    warning('Failed to upload file')
   } finally {
     processing.value = false
     fileData.value = null
     fileName.value = ''
-    dir.value = ''
+    filePath.value = ''
   }
 }
 </script>
 
 <template>
-  <div class="px-10 py-5 max-w-screen-md mx-auto">
+  <SpaceLayout>
     <div class="flex items-center justify-between">
-      <h1 class="fredoka text-3xl mb-5">Upload</h1>
-      <green-link :to="`/spaces/${id}`">Back</green-link>
+        <h1 class="fredoka text-3xl mb-5">{{ space?.name }}</h1>
+        <div class="flex items-center space-x-2">
+          <buttons-button-pinkle :to="`/spaces/${id}`" class="!w-min">Files</buttons-button-pinkle>
+        </div>
     </div>
-    <div>
+
+    <div class="mt-5 max-w-sm mx-auto">
       <form @submit.prevent>
-        <input :disabled="processing" v-model.lazy="dir" type="text" placeholder="Enter directory (default is /)" class="w-full bg-gray-200 text-gray-700 rounded-lg p-3">
-        <input :disabled="processing" v-model.lazy="fileName" type="text" placeholder="Rename file (empty for default)" class="w-full bg-gray-200 text-gray-700 rounded-lg p-3 mt-4">
-        <input :disabled="processing" @change="uploadFile" type="file" placeholder="Upload file" class="w-full bg-gray-200 text-gray-700 rounded-lg p-3 mt-4">
-        <green-button :loading="processing" @click="upload" class="mt-4">Upload</green-button>
+        <h2 class="fredoka text-xl mb-2">Upload file</h2>
+        <InputUtil v-model.lazy="filePath" placeholder="Path (default: /)" />
+        <InputUtil v-model.lazy="fileName" placeholder="New file name" class="mt-3" />
+        <buttons-button-bluish @click="(uploadFileEl as HTMLInputElement).click()" type="button" class="mt-3 md:py-2.5">Choose file</buttons-button-bluish>
+        <buttons-button-pinkle @click="upload" class="mt-4 !py-2.5">Submit</buttons-button-pinkle>
+        <input ref="uploadFileEl" type="file" class="hidden" @change="uploadFile">
       </form>
     </div>
-  </div>
+  </SpaceLayout>
 </template>

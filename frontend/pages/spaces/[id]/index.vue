@@ -1,122 +1,81 @@
 <script setup lang="ts">
+import {onMounted, useLoaderStore} from "#imports";
+import type {Space, SpaceFile} from "~/types/space";
+import {dirRoute, fetchDirs, fetchFiles, fetchSpace} from "~/scripts/fetch-spaces";
 import {useRoute, useRouter} from "#app";
-import type {SpaceFile} from "~/types/space";
-import {onMounted, watch} from "vue";
-import prettyBytes from "pretty-bytes";
-import FileIcon from "~/components/icons/file-icon.vue";
-import DotsHandleIcon from "~/components/icons/dots-handle-icon.vue";
-import FolderIcon from "~/components/icons/folder-icon.vue";
-import {apiFetch} from "~/scripts/request";
+import {useToast} from "vue-toastification";
+import SpaceLayout from "~/layouts/space-layout.vue";
+import ReloadIcon from "~/components/icons/reload-icon.vue";
 
+definePageMeta({
+  middleware: ['auth'],
+})
+
+const loader = useLoaderStore()
+const route = useRoute()
+const router = useRouter()
+const { warning, info } = useToast()
+
+const id = route.params.id as string
+const space = ref<Space|null>(null)
 const dirs = ref<Array<string>>([])
 const files = ref<Array<SpaceFile>>([])
 
-const route = useRoute()
-const router = useRouter()
-const id = route.params.id as string
-
-const fetchDirs = async () => {
-  try {
-    const res = await apiFetch(`/spaces/${id}/fs?path=${route.query['dir'] || '/'}`)
-    if(res.status != 200) return router.push('/')
-    dirs.value = await res.json()
-  } catch (e: unknown) {
-    console.error(e)
+const fetchSpaceName = async () => {
+  space.value = await fetchSpace(id)
+  if(!space.value) {
+    warning('Failed to fetch space')
+    await router.push('/spaces')
   }
 }
 
-const fetchFiles = async () => {
-  try {
-    const res = await apiFetch(`/spaces/${id}/files?path=${route.query['dir'] || '/'}`)
-    if(res.status != 200) return router.push('/')
-    files.value = await res.json()
-  } catch (e: unknown) {
-    console.error(e)
-  }
+const dir = () => route.query['directory'] as string || '/'
+
+const fetchSpaceDirs = async () => {
+  const d = await fetchDirs(id, dir())
+  if(d) return dirs.value = d
+  warning('Failed to fetch directories')
 }
 
-const dirRoute = (d: string): string => {
-  const path = route.fullPath.split('?')[0]
-  const searchParams = new URLSearchParams(route.fullPath.split('?')[1] || "")
-  const currentDir = searchParams.get('dir')
-  if(!currentDir) searchParams.set('dir', '/' + d)
-  else searchParams.set('dir', currentDir + '/' + d)
-  return `${path}?${searchParams.toString()}`
+
+const fetchSpaceFiles = async () => {
+  const f = await fetchFiles(id, dir())
+  if(f != null) return files.value = f
+  warning('Failed to fetch files')
 }
 
 onMounted(async () => {
-  await fetchFiles()
-  await fetchDirs()
+  await fetchSpaceName()
+  await load()
 })
 
-watch(route, () => {
-    dirs.value = []
-    files.value = []
-    fetchFiles()
-    fetchDirs()
-})
-
-const downloading = ref(false)
-
-const download = async () => {
-  downloading.value = true
-  try {
-    await apiFetch(`/spaces/${id}/download?path=${route.query['dir'] || '/'}`)
-  } catch(e: unknown) {
-    console.error(e)
-  } finally {
-    downloading.value = false
-  }
+const load = async (reload: boolean = false) => {
+  loader.start()
+  await fetchSpaceFiles()
+  await fetchSpaceDirs()
+  loader.finish()
+  if(reload) info('Reloaded successfully')
 }
+
+watch(route, async () => await load())
 </script>
 
 <template>
-  <div class="px-10 py-5 max-w-screen-md mx-auto">
-    <h1 class="fredoka text-3xl">Space:</h1>
-    <div class="w-full bg-gray-100 rounded-lg my-2 py-3 px-4 flex items-center justify-between">
-      <green-link :to="`/spaces/${id}/upload`">Upload a new file</green-link>
-      <green-button :loading="downloading" @click="download">Download directory as zip</green-button>
-    </div>
-    <p class="my-2 text-sm text-gray-700">Path: <span class="px-1 py-0.5 rounded bg-gray-100">{{ route.query['dir'] || '/' }}</span></p>
-    <ul class="border rounded-lg my-5">
-      <li v-if="route.query['dir']" class="flex items-center space-x-3 py-2 px-4 hover:bg-gray-100 transition rounded-t-lg border-b">
-        <folder-icon class="text-gray-600" />
-        <RouterLink class="w-full" :to="`/spaces/${route.params?.id}`">..</RouterLink>
-      </li>
-      <li
-          class="flex items-center justify-between py-2 px-4 hover:bg-gray-100 transition"
-          v-for="(dir, inx) in dirs" :key="inx"
-          :class="{'border-b': inx != dirs.length, 'rounded-t-lg': inx == 0}"
-      >
-        <!-- File name and icon -->
-        <div class="flex items-center space-x-3">
-          <folder-icon class="text-gray-600" />
-          <RouterLink class="transition hover:underline hover:text-blue-400" :to="dirRoute(dir)">{{ dir }}</RouterLink>
-        </div>
-        <!-- edit icon -->
-        <button>
-          <dots-handle-icon />
-        </button>
-      </li>
-      <li
-          class="flex items-center justify-between py-2 px-4 hover:bg-gray-100 transition"
-          :class="{'border-b': inx != files.length - 1, 'rounded-t-lg': inx == 0 && dirs.length == 0, 'rounded-b-lg': inx == files.length - 1}"
-          v-for="(file, inx) in files" :key="file"
-      >
-        <!-- File name and icon -->
-        <div class="flex items-center space-x-3">
-          <file-icon class="text-gray-600" />
-          <p>{{ file.file_name }}</p>
-        </div>
-        <!-- File size and edit icon -->
+  <SpaceLayout>
+      <div class="flex items-center justify-between">
+        <h1 class="fredoka text-3xl mb-5">{{ space?.name }}</h1>
         <div class="flex items-center space-x-2">
-          <p class="text-gray-700 text-sm">{{ prettyBytes(file.fileinfo.info.size) }}</p>
-          <button>
-            <dots-handle-icon />
-          </button>
+          <buttons-button-pinkle :to="`/spaces/${id}/upload`" class="!w-min">Upload</buttons-button-pinkle>
+          <buttons-button-pinkle @click="load(true)" class="flex items-center justify-center">
+            <reload-icon class="-mt-1" />
+          </buttons-button-pinkle>
         </div>
-      </li>
-    </ul>
-    <p v-if="dirs.length == 0 && files.length == 0">No files yet.</p>
-  </div>
+      </div>
+
+      <ul class="mt-5 bg-widget rounded-lg drop-shadow-sm">
+        <file-list-back :id="id" />
+        <FileList :id="id" v-for="dir in dirs" :key="dir" type="directory" :name="dir" />
+        <FileList :id="id" v-for="file in files" :key="file.id" type="file" :name="file.file_name" :size="file.fileinfo.info.size" />
+      </ul>
+  </SpaceLayout>
 </template>
