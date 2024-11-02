@@ -30,7 +30,6 @@ import {useToast} from "vue-toastification";
 const auth = useAuthStore()
 
 const progress = ref(false)
-const { warning } = useToast()
 
 const request = async () => {
   progress.value = true
@@ -40,7 +39,7 @@ const request = async () => {
     window.location.href = data.redirect_url
   } catch(e: unknown) {
     console.error(e)
-    warning('Failed to create authentication url')
+    if(process.client) useToast().warning('Failed to create authentication url')
   } finally {
     progress.value = false
   }

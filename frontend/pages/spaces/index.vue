@@ -12,14 +12,13 @@ definePageMeta({
 })
 
 const router = useRouter()
-const { warning } = useToast()
 const spaces = ref<Array<Space>>([])
 
 const fetchData = async () => {
   const data = await fetchSpaces()
   if(data) return spaces.value = data
 
-  warning('Failed to load your spaces.')
+  if(process.client) useToast().warning('Failed to load your spaces.')
   await router.push('/')
 }
 

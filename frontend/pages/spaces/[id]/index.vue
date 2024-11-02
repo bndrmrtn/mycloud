@@ -14,7 +14,6 @@ definePageMeta({
 const loader = useLoaderStore()
 const route = useRoute()
 const router = useRouter()
-const { warning, info } = useToast()
 
 const id = route.params.id as string
 const space = ref<Space|null>(null)
@@ -24,7 +23,7 @@ const files = ref<Array<SpaceFile>>([])
 const fetchSpaceName = async () => {
   space.value = await fetchSpace(id)
   if(!space.value) {
-    warning('Failed to fetch space')
+    if(process.client) useToast().warning('Failed to fetch space')
     await router.push('/spaces')
   }
 }
@@ -34,14 +33,14 @@ const dir = () => route.query['directory'] as string || '/'
 const fetchSpaceDirs = async () => {
   const d = await fetchDirs(id, dir())
   if(d) return dirs.value = d
-  warning('Failed to fetch directories')
+  if(process.client) useToast().warning('Failed to fetch directories')
 }
 
 
 const fetchSpaceFiles = async () => {
   const f = await fetchFiles(id, dir())
   if(f != null) return files.value = f
-  warning('Failed to fetch files')
+  if(process.client) useToast().warning('Failed to fetch files')
 }
 
 onMounted(async () => {
@@ -54,7 +53,7 @@ const load = async (reload: boolean = false) => {
   await fetchSpaceFiles()
   await fetchSpaceDirs()
   loader.finish()
-  if(reload) info('Reloaded successfully')
+  if(reload) if(process.client) useToast().info('Reloaded successfully')
 }
 
 watch(route, async () => await load())

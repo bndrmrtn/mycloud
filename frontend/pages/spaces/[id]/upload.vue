@@ -14,12 +14,11 @@ const loader = useLoaderStore()
 
 const id = route.params.id as string
 const space = ref<Space | null>(null)
-const { warning, success } = useToast()
 
 const fetchSpaceName = async () => {
   space.value = await fetchSpace(id)
   if(!space.value) {
-    warning('Failed to fetch space')
+    if(process.client) useToast().warning('Failed to fetch space')
     await router.push('/spaces')
   }
 }
@@ -62,10 +61,10 @@ const upload = async () => {
       method: 'POST',
       body: data,
     })
-    success('Successfully uploaded')
+    if(process.client) useToast().success('Successfully uploaded')
   } catch (e: unknown) {
     console.error(e)
-    warning('Failed to upload file')
+    if(process.client) useToast().warning('Failed to upload file')
   } finally {
     processing.value = false
     fileData.value = null
