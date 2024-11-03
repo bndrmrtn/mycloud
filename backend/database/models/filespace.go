@@ -7,5 +7,5 @@ type FileSpace struct {
 	// Name is the name of the file space
 	Name string `json:"name" gorm:"not null"`
 	// Size is the total size of the file space
-	Size int64 `json:"size" gorm:"-:all"`
+	Size int64 `json:"size" gorm:"-:migration"`
 }

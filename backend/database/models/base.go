@@ -9,7 +9,7 @@ import (
 
 type Base struct {
 	// ID is the primary key of the model
-	ID string `json:"id" gorm:"primaryKey;type:varchar(191)"`
+	ID string `json:"id" gorm:"primaryKey;unique;type:varchar(191)"`
 	// CreatedAt is the time when the model is created
 	CreatedAt time.Time `json:"created_at"`
 	// UpdatedAt is the time when the model is updated

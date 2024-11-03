@@ -5,7 +5,11 @@
                     <span class="text-4xl md:text-5xl text-green-300 fredoka">MyCloud</span><br/>
                     <span class="text-purple-400">Web-Based File<span class="fredoka">System</span></span>
                </h1>
-               <p class="text-center text-gray-300 mt-2 text-lg">Easy to use web driven file system</p>
+               <p class="text-center text-gray-300 mt-2 text-lg">
+                 Made with
+                 <HeartIcon v-tooltip="'Love'" class="text-red-400 cursor-pointer -mt-0.5" /> by
+                 <a target="_blank" class="text-blue-400 hover:underline" href="https://mrtn.vip">Martin Binder</a>
+               </p>
 
                <div class="md:grid md:grid-cols-2 md:gap-2 mt-3 md:px-5">
                     <ButtonsGithubButton />
@@ -26,6 +30,7 @@
 import {newRequest} from "~/scripts/request";
 import {onMounted, useLoaderStore} from "#imports";
 import {useToast} from "vue-toastification";
+import HeartIcon from "~/components/icons/heart-icon.vue";
 
 const auth = useAuthStore()
 

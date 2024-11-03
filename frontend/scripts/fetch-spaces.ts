@@ -13,6 +13,7 @@ export const fetchSpaces = async (): Promise<Array<Space> | null> => {
     }
 }
 
+
 export const fetchSpace = async (spaceID: string): Promise<Space | null> => {
     try {
         const res = await newRequest(`/spaces/${spaceID}`)

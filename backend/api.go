@@ -14,6 +14,7 @@ import (
 
 func NewApiServer(db *gorm.DB, store bolt.SessionStore, svc services.StorageService) *bolt.Bolt {
 	conf := config.Api(store)
+	conf.Mode = config.Mode()
 
 	app := bolt.New(&conf)
 	ws := NewWSServer(app, db)

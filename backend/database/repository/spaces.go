@@ -7,7 +7,19 @@ import (
 
 func GetAllSpacesForUser(db *gorm.DB, userID string) ([]models.FileSpace, error) {
 	var spaces []models.FileSpace
-	result := db.Where("user_id = ?", userID).Order("updated_at desc").Find(&spaces)
+	result := db.Raw(`
+		select
+			file_spaces.id as id,
+			file_spaces.created_at as created_at,
+			file_spaces.updated_at as updated_at,
+			file_spaces.name as name,
+			sum(os_files.file_size) as size
+		from file_spaces
+		inner join files on files.file_space_id = file_spaces.id
+		inner join os_files on os_files.id = files.os_file_id
+		where file_spaces.user_id = ?
+		group by file_spaces.id
+	`, userID).Find(&spaces)
 	return spaces, result.Error
 }
 
