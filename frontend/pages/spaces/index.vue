@@ -5,7 +5,8 @@ import {useToast} from "vue-toastification";
 import {fetchSpaces} from "~/scripts/fetch-spaces";
 import {useRouter} from "#app";
 import prettyBytes from "pretty-bytes";
-import SpaceLayout from "~/layouts/space-layout.vue";
+import SpaceLayout from "~/layouts/space.vue";
+import CreateSpaceModal from "~/components/modals/create-space-modal.vue";
 
 definePageMeta({
   middleware: ['auth'],
@@ -13,6 +14,7 @@ definePageMeta({
 
 const router = useRouter()
 const spaces = ref<Array<Space>>([])
+const createModal = ref(false)
 
 const fetchData = async () => {
   const data = await fetchSpaces()
@@ -20,6 +22,10 @@ const fetchData = async () => {
 
   if(process.client) useToast().warning('Failed to load your spaces.')
   await router.push('/')
+}
+
+const addSpace = (s: Space) => {
+  spaces.value.push(s)
 }
 
 onMounted(async () => {
@@ -32,12 +38,12 @@ onMounted(async () => {
   <SpaceLayout>
       <div class="flex items-center justify-between">
         <h1 class="fredoka text-3xl mb-5">Spaces</h1>
-        <buttons-button-pinkle class="!w-min">Create</buttons-button-pinkle>
+        <buttons-button-pinkle @click="createModal = true" class="!w-min">Create</buttons-button-pinkle>
       </div>
 
       <ul class="mt-5">
         <li
-            class="w-full bg-widget py-3 px-4 rounded-lg drop-shadow-sm flex items-center justify-between mb-3"
+            class="w-full bg-widget bg-blur py-3 px-4 rounded-lg drop-shadow-sm flex items-center justify-between mb-3"
             v-for="space in spaces" :key="space.id"
         >
           <div>
@@ -48,4 +54,6 @@ onMounted(async () => {
         </li>
       </ul>
   </SpaceLayout>
+
+  <CreateSpaceModal v-if="createModal" @close="createModal = false" @finish="addSpace" />
 </template>

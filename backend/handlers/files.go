@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"path/filepath"
+	"strings"
 
 	"github.com/bndrmrtn/go-bolt"
 	"github.com/bndrmrtn/my-cloud/database/models"
@@ -83,15 +84,36 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc
 			return bolt.NewError(http.StatusBadRequest, "File name is too long")
 		}
 
+		if strings.Contains(name, "/") {
+			return bolt.NewError(http.StatusBadRequest, "File name cannot contain slashes")
+		}
+
 		dir := c.Request().FormValue("directory")
 		dir = filepath.Clean(dir)
 		if dir == "." {
 			dir = "/"
 		}
 
+		if !strings.HasPrefix(dir, "/") {
+			dir = "/" + dir
+		}
+
+		if dir != "/" {
+			dir = strings.TrimSuffix(dir, "/")
+		}
+
 		osFile, err := svc.StoreMultipartFile(header)
 		if err != nil {
 			return err
+		}
+
+		exists, err := repository.IsFileExists(db, space.ID, dir, name)
+		if err != nil {
+			return err
+		}
+
+		if exists {
+			return bolt.NewError(http.StatusFound, "File already exists in this directory")
 		}
 
 		file := models.File{

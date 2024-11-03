@@ -35,6 +35,7 @@ func registerRoutes(r bolt.Router, db *gorm.DB, store bolt.SessionStore, svc ser
 	auth := r.Group("/", middlewares.AuthMiddleware(db))
 
 	auth.Get("/me", handlers.HandleGetAuthUser)
+	auth.Get("/logout", handlers.HandleLogout)
 
 	// Manage spaces
 	{

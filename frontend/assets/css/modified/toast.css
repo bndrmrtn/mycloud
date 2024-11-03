@@ -1,0 +1,24 @@
+/* Original source: vue-toastification/dist/index.css */
+
+/* .Vue-Toastification__toast--default <- default, not used yet */
+
+.Vue-Toastification__toast--info {
+    background-color: #2196f3;
+    @apply bg-gradient-to-r from-indigo-400 via-violet-500 to-blue-400;
+    color: #fff;
+}
+.Vue-Toastification__toast--success {
+    background-color: #4caf50;
+    @apply bg-gradient-to-r from-emerald-400 via-green-400 to-lime-200;
+    color: #fff;
+}
+.Vue-Toastification__toast--error {
+    background-color: #ff5252;
+    @apply bg-gradient-to-r from-rose-600 to-pink-600;
+    color: #fff;
+}
+.Vue-Toastification__toast--warning {
+    background-color: #ffc107;
+    @apply bg-gradient-to-r from-amber-400 via-orange-300 to-yellow-300;
+    color: #fff;
+}

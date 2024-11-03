@@ -2,8 +2,8 @@
      <div class="min-h-screen flex items-center justify-center bg-square">
           <div class="px-5">
                <h1 class="text-3xl md:text-5xl text-center inter font-bold leading-snug drop-shadow">
-                    <span class="text-green-300 fredoka">MyCloud</span><br/>
-                    <span class="text-purple-400">Web File <span class="fredoka">System</span></span>
+                    <span class="text-4xl md:text-5xl text-green-300 fredoka">MyCloud</span><br/>
+                    <span class="text-purple-400">Web-Based File<span class="fredoka">System</span></span>
                </h1>
                <p class="text-center text-gray-300 mt-2 text-lg">Easy to use web driven file system</p>
 

@@ -1,6 +1,7 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './bgs.css';
+@import './modified/toast.css';
 
 svg {
      display: inline-block;

@@ -113,6 +113,10 @@ func HandleGetAuthUser(c bolt.Ctx) error {
 	return c.JSON(user)
 }
 
+func HandleLogout(c bolt.Ctx) error {
+	return c.Session().Destroy()
+}
+
 func updateUserImage(db *gorm.DB, svc services.StorageService, gImageURL string, user *models.User) error {
 	if user.Image != "" {
 		return nil

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import {onMounted, useLoaderStore} from "#imports";
 import type {Space, SpaceFile} from "~/types/space";
-import {dirRoute, fetchDirs, fetchFiles, fetchSpace} from "~/scripts/fetch-spaces";
+import {fetchDirs, fetchFiles, fetchSpace} from "~/scripts/fetch-spaces";
 import {useRoute, useRouter} from "#app";
 import {useToast} from "vue-toastification";
-import SpaceLayout from "~/layouts/space-layout.vue";
+import SpaceLayout from "~/layouts/space.vue";
 import ReloadIcon from "~/components/icons/reload-icon.vue";
 
 definePageMeta({
-  middleware: ['auth'],
+  middleware: ['space', 'auth'],
 })
 
 const loader = useLoaderStore()
@@ -19,6 +19,7 @@ const id = route.params.id as string
 const space = ref<Space|null>(null)
 const dirs = ref<Array<string>>([])
 const files = ref<Array<SpaceFile>>([])
+const fileModal = ref<SpaceFile | null>(null)
 
 const fetchSpaceName = async () => {
   space.value = await fetchSpace(id)
@@ -56,6 +57,16 @@ const load = async (reload: boolean = false) => {
   if(reload) if(process.client) useToast().info('Reloaded successfully')
 }
 
+const openFileModal = (id: string) => {
+  console.log('modal', id)
+  for(let i = 0; i < files.value.length; i++) {
+    if(files.value[i].id == id) {
+      fileModal.value = files.value[i]
+      break
+    }
+  }
+}
+
 watch(route, async () => await load())
 </script>
 
@@ -71,10 +82,16 @@ watch(route, async () => await load())
         </div>
       </div>
 
-      <ul class="mt-5 bg-widget rounded-lg drop-shadow-sm">
-        <file-list-back :id="id" />
+    <ul class="mt-5 bg-widget bg-blur rounded-lg drop-shadow-sm">
+        <FileListBack :id="id" />
         <FileList :id="id" v-for="dir in dirs" :key="dir" type="directory" :name="dir" />
-        <FileList :id="id" v-for="file in files" :key="file.id" type="file" :name="file.file_name" :size="file.fileinfo.info.size" />
-      </ul>
+        <FileList @openModal="openFileModal" v-for="file in files" :key="file.id" type="file" :id="file.id" :name="file.file_name" :size="file.fileinfo.info.size" :file-type="file.fileinfo.info.type" />
+    </ul>
+
+    <div v-if="dirs.length == 0 && files.length == 0">
+      <p>You have no files currently.</p>
+    </div>
   </SpaceLayout>
+
+  <ModalsFileModal v-if="fileModal != null" :file="fileModal" @close="fileModal = null" />
 </template>

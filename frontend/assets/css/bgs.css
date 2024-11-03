@@ -18,3 +18,7 @@
        );
      background-size: var(--gap) var(--gap);
 }
+
+.bg-blur {
+    @apply bg-opacity-60 backdrop-blur
+}

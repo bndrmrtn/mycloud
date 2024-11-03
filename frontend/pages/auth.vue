@@ -2,7 +2,7 @@
 import {newRequest} from "~/scripts/request";
 import type {User} from "~/types/user";
 import SpinnerIcon from "~/components/icons/spinner-icon.vue";
-import {useLoaderStore} from "#imports";
+import {useAuthStore, useLoaderStore} from "#imports";
 
 const router = useRouter()
 const route = useRoute()
@@ -19,7 +19,7 @@ onMounted(async () => {
   try {
     const res = await newRequest(url)
     const data = await res.json() as {user: User}
-    useAuthStore().user = data.user
+    useAuthStore().set(data.user)
     await router.push('/')
   } catch (e: unknown) {
     console.error(e)

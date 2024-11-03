@@ -12,11 +12,15 @@
   },
   "dependencies": {
     "@pinia/nuxt": "^0.6.1",
+    "floating-vue": "^5.2.2",
+    "mime": "^4.0.4",
     "nuxt": "^3.13.2",
     "pinia": "^2.2.5",
     "pretty-bytes": "^6.1.1",
+    "uuid": "^11.0.2",
     "vue": "latest",
     "vue-router": "latest",
+    "vue-tippy": "^6.5.0",
     "vue-toastification": "^2.0.0-rc.5"
   },
   "devDependencies": {

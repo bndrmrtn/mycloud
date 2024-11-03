@@ -2,6 +2,7 @@ import { newRequest } from "~/scripts/request"
 import type { User } from "~/types/user"
 
 export default defineNuxtRouteMiddleware(async to => {
+     // @ts-ignore
      if(import.meta.server) return
 
      let ok = false
@@ -10,7 +11,7 @@ export default defineNuxtRouteMiddleware(async to => {
           const res = await newRequest('/me')
           if(res.status === 200) {
                const data = await res.json()
-               useAuthStore().user = data as User
+               useAuthStore().set(data as User)
                ok = true
           }
      } catch (err) {
