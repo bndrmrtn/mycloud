@@ -36,14 +36,10 @@ useHead({
 useSeoMeta({
   ogSiteName: 'MyCloud',
   ogTitle: 'MyCloud - ',
-  ogDescription: 'Üdvözöllek a Hungarian Vypers Gaming hivatalos weboldalán.',
+  ogDescription: 'Easy to use Web-Based FileSystem.',
   ogType: 'website',
-  ogUrl: 'https://vypers.hu',
-  themeColor: '#73177b',
-  ogImage: 'https://vypers.hu/thumbnail/logo.png',
-  ogImageAlt: 'Vypers Logo',
-  ogImageWidth: '128',
-  ogImageHeight: '128',
+  ogUrl: 'https://cloud.mrtn.vip',
+  themeColor: '#dcbff5',
   robots: 'index, follow'
 })
 
