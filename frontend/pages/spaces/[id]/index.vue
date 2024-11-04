@@ -6,6 +6,8 @@ import {useRoute, useRouter} from "#app";
 import {useToast} from "vue-toastification";
 import SpaceLayout from "~/layouts/space.vue";
 import ReloadIcon from "~/components/icons/reload-icon.vue";
+import DownloadIcon from "~/components/icons/download-icon.vue";
+import {requestSpaceDownload} from "~/scripts/create-space";
 
 definePageMeta({
   middleware: ['space', 'auth'],
@@ -20,6 +22,8 @@ const space = ref<Space|null>(null)
 const dirs = ref<Array<string>>([])
 const files = ref<Array<SpaceFile>>([])
 const fileModal = ref<SpaceFile | null>(null)
+
+const downloading = ref(false)
 
 const fetchSpaceName = async () => {
   space.value = await fetchSpace(id)
@@ -67,6 +71,15 @@ const openFileModal = (id: string) => {
   }
 }
 
+const createDownload = async () => {
+  downloading.value = true
+  const res = await requestSpaceDownload(id)
+  downloading.value = false
+  if(!process.client) return
+  if(res != null) useToast().warning(res.message)
+  else useToast().success('Download requested successfully')
+}
+
 watch(route, async () => await load())
 </script>
 
@@ -76,6 +89,9 @@ watch(route, async () => await load())
         <h1 class="fredoka text-3xl mb-5">{{ space?.name }}</h1>
         <div class="flex items-center space-x-2">
           <buttons-button-pinkle :to="`/spaces/${id}/upload`" class="!w-min">Upload</buttons-button-pinkle>
+          <buttons-button-pinkle @click="createDownload" :isLoading="downloading" class="flex items-center justify-center">
+            <download-icon class="-mt-1" />
+          </buttons-button-pinkle>
           <buttons-button-pinkle @click="load(true)" class="flex items-center justify-center">
             <reload-icon class="-mt-1" />
           </buttons-button-pinkle>

@@ -1,4 +1,4 @@
-import type {Space} from "~/types/space";
+import type {Space, SpaceFile} from "~/types/space";
 import {newRequest} from "~/scripts/request";
 import {useToast} from "vue-toastification";
 
@@ -40,6 +40,17 @@ export const createFile = async (id: string, file: File, dir: string, name: stri
         return Error('An unknown error occurred')
     } catch (e: unknown) {
         console.error('Failed to upload file', e)
+        return Error('An unknown error occurred')
+    }
+}
+
+export const requestSpaceDownload = async (spaceID: string, path: string = '/'): Promise<Error | null> => {
+    try {
+        const res = await newRequest(`/spaces/${spaceID}/download?path=${path}`)
+        if(res.status != 202) return Error('Failed to request a download')
+        return null
+    } catch (e: unknown) {
+        console.error('Failed to fetch files', e)
         return Error('An unknown error occurred')
     }
 }

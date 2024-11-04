@@ -3,6 +3,7 @@ import {newRequest} from "~/scripts/request";
 import type {User} from "~/types/user";
 import SpinnerIcon from "~/components/icons/spinner-icon.vue";
 import {useAuthStore, useLoaderStore} from "#imports";
+import {useToast} from "vue-toastification";
 
 const router = useRouter()
 const route = useRoute()
@@ -18,6 +19,7 @@ onMounted(async () => {
   const url = '/gauth?' + q.substring(0, q.length-1)
   try {
     const res = await newRequest(url)
+    if(res.status != 200) if(process.client) useToast().warning('Failed to authorize')
     const data = await res.json() as {user: User}
     useAuthStore().set(data.user)
     await router.push('/')

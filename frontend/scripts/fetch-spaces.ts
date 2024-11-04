@@ -47,12 +47,3 @@ export const fetchFiles = async (spaceID: string, path: string): Promise<Array<S
         return null
     }
 }
-
-export const dirRoute = (p: string, d: string): string => {
-    const path = p.split('?')[0]
-    const searchParams = new URLSearchParams(p.split('?')[1] || "")
-    const currentDir = searchParams.get('directory')
-    if(!currentDir) searchParams.set('directory', '/' + d)
-    else searchParams.set('directory', currentDir + '/' + d)
-    return `${path}?${searchParams.toString()}`
-}

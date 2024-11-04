@@ -8,7 +8,7 @@ To install MyCloud, simply clone the repository and run the following command:
 
 Clone the repository.
 ```bash
-git clone https:///github.com/bndrmrtn/mycloud.git
+git clone https://github.com/bndrmrtn/mycloud.git
 ```
 
 Use docker compose to build and run the application.

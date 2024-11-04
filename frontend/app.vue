@@ -14,6 +14,8 @@ import LoaderUtil from '~/components/utils/loader-util.vue'
 import {useLoaderStore} from "~/stores/loader";
 import {onMounted} from "#imports";
 import FadeTransition from "~/components/transitions/fade-transition.vue";
+import {useSocket} from "~/composables/useSocket";
+import {handleSocketDownloadRequestFinished} from "~/scripts/socket";
 
 const loader = useLoaderStore()
 
@@ -44,4 +46,12 @@ useSeoMeta({
   ogImageHeight: '128',
   robots: 'index, follow'
 })
+
+const socket = useSocket()
+onMounted(() => {
+  socket.on('download_request_finished', handleSocketDownloadRequestFinished)
+  socket.connect()
+})
+
+onBeforeUnmount(() => socket.finish())
 </script>

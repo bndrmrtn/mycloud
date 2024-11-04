@@ -106,6 +106,7 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws bolt.WSServe
 			db.Create(&download)
 
 			return wsWriter(ws, userID, bolt.Map{
+				"type":                      "download_request_finished",
 				"download_request_finished": true,
 				"request_id":                reqID,
 				"download_id":               download.ID,

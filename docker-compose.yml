@@ -20,6 +20,8 @@ services:
     container_name: mycloud-redis
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+      - ./redis-data:/data
   # nuxt frontend
   frontend:
     build:

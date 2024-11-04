@@ -37,7 +37,7 @@ func AuthMiddleware(db *gorm.DB) bolt.MiddlewareFunc {
 func WSAuthMiddleware(db *gorm.DB) bolt.MiddlewareFunc {
 	return func(c bolt.Ctx) (bool, error) {
 		unauthorized := bolt.NewError(http.StatusUnauthorized, "Unauthorized")
-		defer logrus.Info("Middleware: AuthMiddleware")
+		defer logrus.Info("Middleware: WSAuthMiddleware")
 
 		token, err := c.Session().From(c.URL().Query().Get("auth")).Get(utils.AuthSessionKey)
 		if err != nil {

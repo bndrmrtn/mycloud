@@ -1,5 +1,12 @@
+# Env files
 .env
 .env.*
 !*.example
-mysql-data
+
+# Data directories
 appdata
+mycloud-appdata
+
+# External services
+mysql-data
+redis-data
