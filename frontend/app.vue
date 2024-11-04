@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import LoaderUtil from '~/components/utils/loader-util.vue'
 import {useLoaderStore} from "~/stores/loader";
-import {onMounted, onBeforeUnmount} from "#imports";
+import {onMounted, onBeforeUnmount, useAuthStore} from "#imports";
 import FadeTransition from "~/components/transitions/fade-transition.vue";
 import {useSocket} from "~/composables/useSocket";
 import {handleSocketDownloadRequestFinished} from "~/scripts/socket";
@@ -43,11 +43,25 @@ useSeoMeta({
   robots: 'index, follow'
 })
 
+const auth = useAuthStore()
 const socket = useSocket()
+const socketOk = ref(false)
+
 onMounted(() => {
+  startSocket()
+})
+
+watch(auth, () => {
+  if(auth.isLoggedIn) startSocket()
+})
+
+const startSocket = () => {
+  if(socketOk.value) return
+  if(!auth.isLoggedIn) return
+  socketOk.value = true
   socket.on('download_request_finished', handleSocketDownloadRequestFinished)
   socket.connect()
-})
+}
 
 onBeforeUnmount(() => socket.finish())
 </script>

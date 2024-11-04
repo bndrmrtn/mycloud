@@ -12,6 +12,7 @@ COPY . .
 EXPOSE 3000
 
 ENV API_URL "/api"
+ENV WS_URL "wss://cloud.mrtn.vip/api/ws"
 RUN npm run build
 
 CMD [ "npm", "run", "start" ]

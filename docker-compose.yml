@@ -28,8 +28,8 @@ services:
       context: ./frontend
     container_name: mycloud-nuxt
     restart: always
-    env_file:
-      - .env.frontend
+    environment:
+      TZ: "Europe/Budapest"
   # file mannager api
   backend:
     build:
