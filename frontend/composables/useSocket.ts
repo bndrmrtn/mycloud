@@ -10,7 +10,7 @@ const handlers = ref({}) as Ref<{[key: string]: HandlerFunc}>
 
 export const useSocket = () => {
     const connect = () => {
-        socket.value = new WebSocket(`ws://localhost:3002/ws`)
+        socket.value = new WebSocket(`${useRuntimeConfig().public.ws}`)
         socket.value.onerror = error
         socket.value.onopen = open
         socket.value.onmessage = handler

@@ -14,6 +14,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       api: process.env.API_URL,
+      ws: process.env.WS_URL,
     },
   },
 

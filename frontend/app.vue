@@ -12,7 +12,7 @@
 <script setup lang="ts">
 import LoaderUtil from '~/components/utils/loader-util.vue'
 import {useLoaderStore} from "~/stores/loader";
-import {onMounted} from "#imports";
+import {onMounted, onBeforeUnmount} from "#imports";
 import FadeTransition from "~/components/transitions/fade-transition.vue";
 import {useSocket} from "~/composables/useSocket";
 import {handleSocketDownloadRequestFinished} from "~/scripts/socket";
@@ -35,7 +35,7 @@ useHead({
 
 useSeoMeta({
   ogSiteName: 'MyCloud',
-  ogTitle: 'MyCloud - ',
+  ogTitle: 'MyCloud - Mrtn.Vip',
   ogDescription: 'Easy to use Web-Based FileSystem.',
   ogType: 'website',
   ogUrl: 'https://cloud.mrtn.vip',
