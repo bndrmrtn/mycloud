@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
+	"path/filepath"
 
 	"github.com/bndrmrtn/go-bolt"
 	"github.com/bndrmrtn/my-cloud/database/models"
@@ -33,4 +35,35 @@ func ctxSpace(c bolt.Ctx) (*models.FileSpace, error) {
 	}
 
 	return nil, bolt.NewError(http.StatusNotFound, "Space not found")
+}
+
+func ctxSpaceFile(c bolt.Ctx) (*models.File, error) {
+	space := c.Get(utils.RequestSpaceFileKey)
+	if space != nil {
+		return space.(*models.File), nil
+	}
+
+	return nil, bolt.NewError(http.StatusNotFound, "File not found")
+}
+
+func wsWriter(ws bolt.WSServer, userID string, data any) error {
+	b, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	ws.BroadcastFunc(b, func(conn bolt.WSConn) bool {
+		return conn.Ctx().Get(utils.WSUserID) == userID
+	})
+
+	return nil
+}
+
+func queryPath(c bolt.Ctx) string {
+	path := c.URL().Query().Get("path")
+	if path == "" || path == "." {
+		path = "/"
+	}
+
+	return filepath.Clean(path)
 }

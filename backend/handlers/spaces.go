@@ -13,6 +13,16 @@ type CreateSpacesRequest struct {
 	Name string `json:"name"`
 }
 
+func HandleGetSpace(db *gorm.DB) bolt.HandlerFunc {
+	return func(c bolt.Ctx) error {
+		space, err := ctxSpace(c)
+		if err != nil {
+			return err
+		}
+		return c.JSON(space)
+	}
+}
+
 func HandleCreateSpace(db *gorm.DB) bolt.HandlerFunc {
 	return func(c bolt.Ctx) error {
 		var data CreateSpacesRequest

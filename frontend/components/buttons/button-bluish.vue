@@ -1,9 +1,14 @@
 <template>
-  <ButtonRootLink classList="from-indigo-400 via-violet-500 to-blue-400">
+  <BtnRoot :to="to" :is-loading="isLoading" class="from-indigo-400 via-violet-500 to-blue-400">
     <slot/>
-  </ButtonRootLink>
+  </BtnRoot>
 </template>
 
 <script setup lang="ts">
-import ButtonRootLink from '~/components/buttons/button-root-link.vue'
+import BtnRoot from "~/components/betterbuttons/btn-root.vue";
+
+defineProps<{
+  to?: string
+  isLoading?: boolean
+}>()
 </script>

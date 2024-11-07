@@ -23,7 +23,7 @@ func NewWSServer(app *bolt.Bolt, db *gorm.DB) bolt.WSServer {
 		userID := user.(*models.User).ID
 		conn.Ctx().Set(utils.WSUserID, userID)
 		server.AddConn(conn)
-	}, middlewares.AuthMiddleware(db))
+	}, middlewares.AuthMiddleware(db)).Name("ws")
 
 	server.OnMessage(func(s bolt.WSServer, conn bolt.WSConn, msg []byte) error {
 		type EchoMsg struct {

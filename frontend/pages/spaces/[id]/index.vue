@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import {onMounted, useLoaderStore} from "#imports";
 import type {Space, SpaceFile} from "~/types/space";
-import {fetchDirs, fetchFiles, fetchSpace} from "~/scripts/fetch-spaces";
 import {useRoute, useRouter} from "#app";
 import {useToast} from "vue-toastification";
 import SpaceLayout from "~/layouts/space.vue";
 import ReloadIcon from "~/components/icons/reload-icon.vue";
 import DownloadIcon from "~/components/icons/download-icon.vue";
-import {requestSpaceDownload} from "~/scripts/create-space";
+import {fetchDirs, fetchFiles, fetchSpace, requestSpaceDownload} from "~/scripts/space";
 
 definePageMeta({
   middleware: ['space', 'auth'],
@@ -22,8 +21,23 @@ const space = ref<Space|null>(null)
 const dirs = ref<Array<string>>([])
 const files = ref<Array<SpaceFile>>([])
 const fileModal = ref<SpaceFile | null>(null)
-
 const downloading = ref(false)
+
+const downloadDir = async () => {
+  downloading.value = true
+  const err = await requestSpaceDownload(id)
+  downloading.value = false
+
+  if(!process.client) return
+  const toast = useToast()
+
+  if(err instanceof Error) {
+    toast.error(err.message)
+    return
+  }
+
+  toast.info('Download requested successfully')
+}
 
 const fetchSpaceName = async () => {
   space.value = await fetchSpace(id)
@@ -62,22 +76,12 @@ const load = async (reload: boolean = false) => {
 }
 
 const openFileModal = (id: string) => {
-  console.log('modal', id)
   for(let i = 0; i < files.value.length; i++) {
     if(files.value[i].id == id) {
       fileModal.value = files.value[i]
       break
     }
   }
-}
-
-const createDownload = async () => {
-  downloading.value = true
-  const res = await requestSpaceDownload(id)
-  downloading.value = false
-  if(!process.client) return
-  if(res != null) useToast().warning(res.message)
-  else useToast().success('Download requested successfully')
 }
 
 watch(route, async () => await load())
@@ -89,7 +93,7 @@ watch(route, async () => await load())
         <h1 class="fredoka text-3xl mb-5">{{ space?.name }}</h1>
         <div class="flex items-center space-x-2">
           <buttons-button-pinkle :to="`/spaces/${id}/upload`" class="!w-min">Upload</buttons-button-pinkle>
-          <buttons-button-pinkle @click="createDownload" :isLoading="downloading" class="flex items-center justify-center">
+          <buttons-button-pinkle @click="downloadDir" :is-loading="downloading" class="flex items-center justify-center">
             <download-icon class="-mt-1" />
           </buttons-button-pinkle>
           <buttons-button-pinkle @click="load(true)" class="flex items-center justify-center">

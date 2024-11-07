@@ -2,11 +2,11 @@
 import {onMounted, useLoaderStore} from "#imports";
 import type {Space} from "~/types/space";
 import {useToast} from "vue-toastification";
-import {fetchSpaces} from "~/scripts/fetch-spaces";
 import {useRouter} from "#app";
 import prettyBytes from "pretty-bytes";
 import SpaceLayout from "~/layouts/space.vue";
 import CreateSpaceModal from "~/components/modals/create-space-modal.vue";
+import {fetchSpaces} from "~/scripts/space";
 
 definePageMeta({
   middleware: ['auth'],

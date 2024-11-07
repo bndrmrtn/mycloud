@@ -4,19 +4,13 @@ import LogoutIcon from "~/components/icons/logout-icon.vue";
 import PlanetIcon from "~/components/icons/planet-icon.vue";
 import SpinnerIcon from "~/components/icons/spinner-icon.vue";
 import {useRouter} from "#app";
+import LogoutModal from "~/components/modals/logout-modal.vue";
 
 const router = useRouter()
 const env = useRuntimeConfig()
 const auth = useAuthStore()
 
-const loggingOut = ref(false)
-
-const logout = async () => {
-  loggingOut.value = true
-  await auth.logout()
-  loggingOut.value = false
-  await router.push('/')
-}
+const logout = ref(false)
 </script>
 
 <template>
@@ -36,13 +30,14 @@ const logout = async () => {
           <PlanetIcon />
         </RouterLink>
 
-        <button @click="logout" v-tooltip="'Logout'" class="link">
-          <SpinnerIcon v-if="loggingOut" />
-          <LogoutIcon v-else />
+        <button @click="logout = true" v-tooltip="'Logout'" class="link">
+          <LogoutIcon />
         </button>
       </div>
     </div>
   </nav>
+
+  <logout-modal v-if="logout" @close="logout = false" />
 </template>
 
 <style scoped>

@@ -11,6 +11,10 @@ svg {
      @apply w-4 h-5 inline-block;
 }
 
+*:focus {
+     outline: none;
+}
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,

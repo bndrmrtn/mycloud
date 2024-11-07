@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"archive/zip"
-	"encoding/json"
 	"io"
 	"net/http"
 	"os"
@@ -13,26 +12,12 @@ import (
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
 	"github.com/bndrmrtn/my-cloud/services"
-	"github.com/bndrmrtn/my-cloud/utils"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
 func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws bolt.WSServer) bolt.HandlerFunc {
-	var wsWriter = func(ws bolt.WSServer, userID string, data any) error {
-		b, err := json.Marshal(data)
-		if err != nil {
-			return err
-		}
-
-		ws.BroadcastFunc(b, func(conn bolt.WSConn) bool {
-			return conn.Ctx().Get(utils.WSUserID) == userID
-		})
-
-		return nil
-	}
-
 	return func(c bolt.Ctx) error {
 		userID, err := ctxUserID(c)
 		if err != nil {
@@ -106,11 +91,10 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws bolt.WSServe
 			db.Create(&download)
 
 			return wsWriter(ws, userID, bolt.Map{
-				"type":                      "download_request_finished",
-				"download_request_finished": true,
-				"request_id":                reqID,
-				"download_id":               download.ID,
-				"download_expiry":           download.Expiry,
+				"type":            "download_request_finished",
+				"request_id":      reqID,
+				"download_id":     download.ID,
+				"download_expiry": download.Expiry,
 			})
 		}(db, ws, filepath.Join(svc.GetTmpDir(), uuid.New().String()+".zip"), space.ID, userID, queryPath(c), c.ID())
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/bndrmrtn/go-bolt"
@@ -20,23 +21,30 @@ func NewApiServer(db *gorm.DB, store bolt.SessionStore, svc services.StorageServ
 	ws := NewWSServer(app, db)
 
 	registerValidators(app.CompleteRouter)
-	app.Hook(bolt.PreRequestHook, func(c bolt.Ctx) {
-		middlewares.CORSMiddleware(c)
+
+	app.Hook(bolt.EveryRequestHook, func(c bolt.Ctx) error {
+		ok, err := middlewares.CORSMiddleware(c)
+		fmt.Println("CORS", ok, err)
+		if !ok {
+			return errors.New("failed to handle CORS")
+		}
+		return err
 	})
 	registerRoutes(app, db, store, svc, ws)
 
+	app.Dump()
 	return app
 }
 
 func registerRoutes(r bolt.Router, db *gorm.DB, store bolt.SessionStore, svc services.StorageService, ws bolt.WSServer) {
 	r.Get("/auth-redirect", handlers.HandleCreateAuthURL).Name("auth.redirect")
 	r.Get("/gauth", handlers.HandleAuthUser(db, svc)).Name("auth.google")
-	r.Get("/profileimage/{id@png}", handlers.HandleGetProfileImage(db, svc, store))
+	r.Get("/profileimage/{id@png}", handlers.HandleGetProfileImage(db, svc, store)).Name("cdn.profileimage")
 
 	auth := r.Group("/", middlewares.AuthMiddleware(db))
 
-	auth.Get("/me", handlers.HandleGetAuthUser)
-	auth.Get("/logout", handlers.HandleLogout)
+	auth.Get("/me", handlers.HandleGetAuthUser).Name("auth.me")
+	auth.Get("/logout", handlers.HandleLogout).Name("auth.logout")
 
 	// Manage spaces
 	{
@@ -44,16 +52,24 @@ func registerRoutes(r bolt.Router, db *gorm.DB, store bolt.SessionStore, svc ser
 		auth.Post("/spaces", handlers.HandleCreateSpace(db)).Name("spaces.create")
 	}
 
-	// Manage files in a space
-	// TODO: Go Bolt does not chain middlewares with groups
-	spaces := r.Group("/spaces/{space_id@uuid}", middlewares.AuthMiddleware(db), middlewares.SpaceMiddleware(db, "space_id"))
+	// Manage file spaces
+	spaces := auth.Group("/spaces/{space_id@uuid}", middlewares.SpaceMiddleware(db, "space_id"))
 	{
 		spaces.Get("/", handlers.HandleGetSpace(db)).Name("spaces.get")
-		spaces.Get("/files", handlers.HandleGetFiles(db)).Name("spaces.files")
 		spaces.Get("/fs", handlers.HandleGetFS(db))
-		spaces.Get("/download", handlers.HandleDownloadDir(db, svc, ws))
 
-		spaces.Post("/upload", handlers.HandleUploadFile(db, svc)).Name("spaces.upload")
+		spaces.Get("/files", handlers.HandleGetFiles(db)).Name("spaces.files")
+
+		spaces.Post("/upload", handlers.HandleUploadFile(db, svc, ws)).Name("spaces.upload")
+		spaces.Get("/download", handlers.HandleDownloadDir(db, svc, ws)).Name("spaces.download")
+	}
+
+	// Manage files in a space
+	files := auth.Group("/files/{file_id@uuid}", middlewares.FileMiddleware(db, "file_id"))
+	{
+		files.Get("/", handlers.HandleGetCodeFileContent(db, svc)).Name("files.get")
+		files.Delete("/", handlers.HandleDeleteFile(db, svc, ws)).Name("files.delete")
+		files.Put("/", handlers.HandleUpdateFileInfo(db)).Name("files.update")
 	}
 }
 

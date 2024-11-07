@@ -2,25 +2,14 @@ package handlers
 
 import (
 	"net/http"
-	"path/filepath"
-	"strings"
 
 	"github.com/bndrmrtn/go-bolt"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
 	"github.com/bndrmrtn/my-cloud/services"
+	"github.com/bndrmrtn/my-cloud/utils"
 	"gorm.io/gorm"
 )
-
-func HandleGetSpace(db *gorm.DB) bolt.HandlerFunc {
-	return func(c bolt.Ctx) error {
-		space, err := ctxSpace(c)
-		if err != nil {
-			return err
-		}
-		return c.JSON(space)
-	}
-}
 
 func HandleGetFiles(db *gorm.DB) bolt.HandlerFunc {
 	return func(c bolt.Ctx) error {
@@ -60,7 +49,7 @@ func HandleGetFS(db *gorm.DB) bolt.HandlerFunc {
 	}
 }
 
-func HandleUploadFile(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc {
+func HandleUploadFile(db *gorm.DB, svc services.StorageService, ws bolt.WSServer) bolt.HandlerFunc {
 	return func(c bolt.Ctx) error {
 		space, err := ctxSpace(c)
 		if err != nil {
@@ -80,27 +69,13 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc
 		name := c.Request().FormValue("filename")
 		if len(name) < 1 {
 			name = header.Filename
-		} else if len(name) > 50 {
-			return bolt.NewError(http.StatusBadRequest, "File name is too long")
 		}
 
-		if strings.Contains(name, "/") {
-			return bolt.NewError(http.StatusBadRequest, "File name cannot contain slashes")
+		if err := validateFileName(name); err != nil {
+			return err
 		}
 
-		dir := c.Request().FormValue("directory")
-		dir = filepath.Clean(dir)
-		if dir == "." {
-			dir = "/"
-		}
-
-		if !strings.HasPrefix(dir, "/") {
-			dir = "/" + dir
-		}
-
-		if dir != "/" {
-			dir = strings.TrimSuffix(dir, "/")
-		}
+		dir := validateDir(c.Request().FormValue("directory"))
 
 		osFile, err := svc.StoreMultipartFile(header)
 		if err != nil {
@@ -128,15 +103,107 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc
 			return err
 		}
 
+		wsWriter(ws, userID, bolt.Map{
+			"type":          "space_file_upload_succeed",
+			"file_space_id": space.ID,
+		})
+
 		return c.JSON(file)
 	}
 }
 
-func queryPath(c bolt.Ctx) string {
-	path := c.URL().Query().Get("path")
-	if path == "" || path == "." {
-		path = "/"
-	}
+func HandleGetCodeFileContent(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc {
+	return func(c bolt.Ctx) error {
+		file, err := ctxSpaceFile(c)
+		if err != nil {
+			return err
+		}
 
-	return path
+		if file.OSFile.FileSize > 5*utils.MB {
+			return bolt.NewError(http.StatusBadRequest, "File is too big")
+		}
+
+		content, err := svc.ReadFile(file.OSFile)
+		if err != nil {
+			return err
+		}
+
+		return c.ContentType(bolt.ContentTypeText).Send(content)
+	}
+}
+
+func HandleDeleteFile(db *gorm.DB, svc services.StorageService, ws bolt.WSServer) bolt.HandlerFunc {
+	return func(c bolt.Ctx) error {
+		userID, err := ctxUserID(c)
+		if err != nil {
+			return err
+		}
+
+		file, err := ctxSpaceFile(c)
+		if err != nil {
+			return err
+		}
+
+		can, err := repository.CanDeleteOSFile(db, file.OSFileID)
+		if err != nil {
+			return err
+		}
+
+		if can {
+			svc.Delete(file.OSFile)
+		}
+
+		if err := db.Delete(&file).Error; err != nil {
+			return err
+		}
+
+		wsWriter(ws, userID, bolt.Map{
+			"type":          "space_file_delete_succeed",
+			"file_space_id": file.FileSpaceID,
+		})
+
+		return c.JSON(bolt.Map{"message": "File deleted"})
+	}
+}
+
+func HandleUpdateFileInfo(db *gorm.DB) bolt.HandlerFunc {
+	return func(c bolt.Ctx) error {
+		file, err := ctxSpaceFile(c)
+		if err != nil {
+			return err
+		}
+
+		var data struct {
+			Name      string `json:"name"`
+			Directory string `json:"directory"`
+		}
+
+		if err := c.Body().ParseJSON(&data); err != nil {
+			return err
+		}
+
+		if err := validateFileName(data.Name); err != nil {
+			return err
+		}
+
+		data.Directory = validateDir(data.Directory)
+
+		ok, err := repository.IsFileExists(db, file.FileSpaceID, data.Directory, data.Name)
+		if err != nil {
+			return err
+		}
+
+		if !ok {
+			return bolt.NewError(http.StatusFound, "File already exists in this directory")
+		}
+
+		file.FileName = data.Name
+		file.Directory = data.Directory
+
+		if err := db.Save(&file).Error; err != nil {
+			return bolt.NewError(http.StatusInternalServerError, "Failed to update file info")
+		}
+
+		return c.JSON(file)
+	}
 }

@@ -54,9 +54,3 @@ func GetSpaceFS(db *gorm.DB, spaceID string, dir string) ([]string, error) {
 		`, dir, dir, dir, spaceID, dir).Find(&files)
 	return files, result.Error
 }
-
-func IsFileExists(db *gorm.DB, spaceID string, dir string, name string) (bool, error) {
-	var count int64
-	result := db.Model(&models.File{}).Where("file_space_id = ? and directory = ? and file_name = ?", spaceID, dir, name).Count(&count)
-	return count > 0, result.Error
-}

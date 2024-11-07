@@ -14,7 +14,7 @@ import ModalUtil from "~/components/utils/modal-util.vue";
 import PlanetIcon from "~/components/icons/planet-icon.vue";
 import InputUtil from "~/components/utils/input-util.vue";
 import ButtonGreenish from "~/components/buttons/button-greenish.vue";
-import {createSpace} from "~/scripts/create-space";
+import {space} from "~/scripts/space";
 import {useToast} from "vue-toastification";
 
 const spaceName = ref('')
@@ -24,7 +24,7 @@ const emit = defineEmits(['close', 'finish'])
 
 const submit = async () => {
   processing.value = true
-  const space = await createSpace(spaceName.value)
+  const space = await space(spaceName.value)
   processing.value = false
 
   if(space instanceof Error) return process.client ? useToast().error(space.message) : null

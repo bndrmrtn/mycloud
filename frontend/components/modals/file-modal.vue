@@ -1,18 +1,13 @@
 <template>
-  <ModalUtil :show="true">
+  <ModalUtil :show="true" @close="emit('close')">
     <h2 class="text-2xl fredoka">Manage file</h2>
-    <div class="text-left my-2">
-      <template v-for="(val, key) in dataset()" :key="key">
-        <div class="my-2">
-          <p class="ml-1 text-sm text-gray-400">{{ key }}:</p>
-          <div class="transition group hover:cursor-pointer w-full px-3 py-1.5 rounded-lg bg-main-from hover:bg-main-to flex items-center justify-between">
-            <p class="text-nowrap overflow-x-scroll">{{ val }}</p>
-            <button @click="copyText(val)" v-tooltip="'Copy content'" class="transition hidden group-hover:flex items-center justify-center w-6 h-6 bg-widget p-1 rounded-lg">
-              <ClipboardIcon/>
-            </button>
-          </div>
-        </div>
-      </template>
+    <file-information v-if="show == 'information'" :info="dataset()" @back="show = 'selector'" />
+    <file-editor v-if="show == 'edit'" :file="file" @back="show = 'selector'" />
+
+    <div class="text-left my-2" v-if="show == 'selector'">
+      <ButtonBluish @click="show = 'information'" class="my-1.5">Information</ButtonBluish>
+      <ButtonBluish @click="show = 'edit'" class="my-1.5">Edit information</ButtonBluish>
+      <file-delete :file_id="file.id" @deleted="emit('close')" />
     </div>
   </ModalUtil>
 </template>
@@ -21,12 +16,20 @@
 import ModalUtil from "~/components/utils/modal-util.vue";
 import type {SpaceFile} from "~/types/space";
 import prettyBytes from "pretty-bytes";
-import ClipboardIcon from "~/components/icons/clipboard-icon.vue";
-import {useToast} from "vue-toastification";
+import ButtonBluish from "~/components/buttons/button-bluish.vue";
+import FileInformation from "~/components/modals/file-modal/file-information.vue";
+import {onMounted} from "vue";
+import FileDelete from "~/components/modals/file-modal/file-delete.vue";
+import FileEditor from "~/components/modals/file-modal/file-editor.vue";
 
 const props = defineProps<{
   file: SpaceFile
 }>()
+
+const emit = defineEmits(['close'])
+const show = ref('selector')
+
+onMounted(() => show.value = 'selector')
 
 const dataset = () => {
   return {
@@ -36,11 +39,5 @@ const dataset = () => {
     'SHA256': props.file.fileinfo.info.hash,
     'Mime type': props.file.fileinfo.info.type,
   }
-}
-
-const copyText = (text: string) => {
-  navigator.clipboard.writeText(text).
-    then(() => process.client ? useToast().info('Successfully copied to clipboard') : null).
-    catch(() => process.client ? useToast().warning('Failed to copy to clipboard') : null)
 }
 </script>

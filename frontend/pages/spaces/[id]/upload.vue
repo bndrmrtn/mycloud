@@ -3,10 +3,9 @@ import SpaceLayout from "~/layouts/space.vue";
 import {onMounted, useLoaderStore} from "#imports";
 import {useRoute, useRouter} from "#app";
 import type {Space} from "~/types/space";
-import {fetchSpace} from "~/scripts/fetch-spaces";
 import {useToast} from "vue-toastification";
 import InputUtil from "~/components/utils/input-util.vue";
-import {createFile} from "~/scripts/create-space";
+import {createFile, fetchSpace} from "~/scripts/space";
 import ButtonBluish from "~/components/buttons/button-bluish.vue";
 
 definePageMeta({

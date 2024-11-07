@@ -1,12 +1,12 @@
 <template>
-     <ButtonRootLink target="_blank" to="https://github.com/bndrmrtn/mycloud" class="from-black to-black">
+     <BtnRoot target="_blank" to="https://github.com/bndrmrtn/mycloud" class="from-black to-black">
           <span class="flex items-center justify-center space-x-3">
               <IconsGithubIcon/>
               <span>{{ 'Open-source repository' }}</span>
           </span>
-     </ButtonRootLink>
+     </BtnRoot>
 </template>
 
 <script setup lang="ts">
-import ButtonRootLink from "~/components/buttons/button-root-link.vue";
+import BtnRoot from "~/components/betterbuttons/btn-root.vue";
 </script>

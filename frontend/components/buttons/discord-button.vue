@@ -1,16 +1,16 @@
 <template>
-  <ButtonRootLink target="_blank" to="https://discord.gg/2BtaJker6S" class="from-[#5865F2] to-[#5865F2] mt-2 md:mt-0">
-            <span class="flex items-center justify-center space-x-3">
-              <IconsDiscordIcon/>
-              <span>{{ title }}</span>
-            </span>
-  </ButtonRootLink>
+  <BtnRoot :is-loading="false" target="_blank" to="https://discord.gg/" class="from-[#5865F2] to-[#5865F2] mt-2 md:mt-0">
+    <span class="flex items-center justify-center space-x-3">
+      <IconsDiscordIcon/>
+      <span>{{ title }}</span>
+    </span>
+  </BtnRoot>
 </template>
 
 <script setup lang="ts">
-import ButtonRootLink from "~/components/buttons/button-root-link.vue";
+import BtnRoot from "~/components/betterbuttons/btn-root.vue";
 
 defineProps<{
-  title: string;
+  title: string
 }>()
 </script>
