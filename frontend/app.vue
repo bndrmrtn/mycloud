@@ -45,6 +45,7 @@ watch(auth, () => {
 const setupWS = () => {
   if([WebSocket.OPEN, WebSocket.CONNECTING].includes(conn.value?.status)) return
   if(conn.value || connected.value) return
+  if(!process.client) return
 
   conn.value = useWebSocket<string>(useRuntimeConfig().public.ws, {
     autoReconnect: true,

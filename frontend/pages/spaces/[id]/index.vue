@@ -29,14 +29,13 @@ const downloadDir = async () => {
   downloading.value = false
 
   if(!process.client) return
-  const toast = useToast()
 
   if(err instanceof Error) {
-    toast.error(err.message)
+    useToast().error(err.message)
     return
   }
 
-  toast.info('Download requested successfully')
+  useToast().info('Download requested successfully')
 }
 
 const fetchSpaceName = async () => {
