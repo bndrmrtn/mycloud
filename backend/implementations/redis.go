@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/bndrmrtn/go-bolt"
+	"github.com/bndrmrtn/go-gale"
 	"github.com/redis/go-redis/v9"
 )
 
@@ -13,7 +13,7 @@ type RedisSessionStore struct {
 	client *redis.Client
 }
 
-func NewRedisSessionStore(ctx context.Context, client *redis.Client) bolt.SessionStore {
+func NewRedisSessionStore(ctx context.Context, client *redis.Client) gale.SessionStore {
 	return &RedisSessionStore{
 		ctx:    ctx,
 		client: client,

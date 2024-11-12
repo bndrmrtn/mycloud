@@ -4,17 +4,17 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/bndrmrtn/go-bolt"
+	"github.com/bndrmrtn/go-gale"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/middlewares"
 	"github.com/bndrmrtn/my-cloud/utils"
 	"gorm.io/gorm"
 )
 
-func NewWSServer(app *bolt.Bolt, db *gorm.DB) bolt.WSServer {
-	server := bolt.NewWSServer(context.Background())
+func NewWSServer(app *gale.Gale, db *gorm.DB) gale.WSServer {
+	server := gale.NewWSServer(context.Background())
 
-	app.WS("/ws", func(conn bolt.WSConn) {
+	app.WS("/ws", func(conn gale.WSConn) {
 		user := conn.Ctx().Get(utils.RequestAuthUserKey)
 		if user == nil {
 			return
@@ -25,7 +25,7 @@ func NewWSServer(app *bolt.Bolt, db *gorm.DB) bolt.WSServer {
 		server.AddConn(conn)
 	}, middlewares.AuthMiddleware(db)).Name("ws")
 
-	server.OnMessage(func(s bolt.WSServer, conn bolt.WSConn, msg []byte) error {
+	server.OnMessage(func(s gale.WSServer, conn gale.WSConn, msg []byte) error {
 		type EchoMsg struct {
 			Type string `json:"type"`
 		}

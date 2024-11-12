@@ -4,21 +4,21 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/bndrmrtn/go-bolt"
+	"github.com/bndrmrtn/go-gale"
 	"github.com/google/uuid"
 )
 
-func Api(store bolt.SessionStore) bolt.Config {
-	return bolt.Config{
-		NotFoundHandler: func(c bolt.Ctx) error {
-			return c.Status(http.StatusNotFound).JSON(bolt.Map{
+func Api(store gale.SessionStore) gale.Config {
+	return gale.Config{
+		NotFoundHandler: func(c gale.Ctx) error {
+			return c.Status(http.StatusNotFound).JSON(gale.Map{
 				"error": "Not Found",
 			})
 		},
-		Session: &bolt.SessionConfig{
+		Session: &gale.SessionConfig{
 			Enabled:     true,
 			TokenExpire: time.Hour * 12,
-			TokenFunc: func(c bolt.Ctx) (string, error) {
+			TokenFunc: func(c gale.Ctx) (string, error) {
 				cookie, err := c.Cookie().Get("session")
 				if err != nil {
 					token := uuid.New().String()

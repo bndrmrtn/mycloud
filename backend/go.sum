@@ -1,15 +1,7 @@
 cloud.google.com/go/compute/metadata v0.3.0 h1:Tz+eQXMEqDIKRsmY3cHTL6FVaynIjX2QxYC4trgAKZc=
 cloud.google.com/go/compute/metadata v0.3.0/go.mod h1:zFmK7XCadkQkj6TtorcaGlCW1hT1fIilQDwofLpJ20k=
-github.com/bndrmrtn/go-bolt v1.0.0-alpha h1:SU4PKdi9+tX6SzbZrr5uNKoX8NcNjE7dKb0j1vHf0r8=
-github.com/bndrmrtn/go-bolt v1.0.0-alpha/go.mod h1:96EKIgmzjJmd5XtgZchP6NWjT7H0/rkKJjgQCbXqj3A=
-github.com/bndrmrtn/go-bolt v1.0.2-beta h1:UEU2S+UWPEVU7MT1zOqj0Tf1x1+fjavBGP+/WxbD8us=
-github.com/bndrmrtn/go-bolt v1.0.2-beta/go.mod h1:96EKIgmzjJmd5XtgZchP6NWjT7H0/rkKJjgQCbXqj3A=
-github.com/bndrmrtn/go-bolt v1.0.2 h1:/IEqf32gJ0wRXOn+kP65NDaDf/Wy5N0U7DRY+q/yqSo=
-github.com/bndrmrtn/go-bolt v1.0.2/go.mod h1:96EKIgmzjJmd5XtgZchP6NWjT7H0/rkKJjgQCbXqj3A=
-github.com/bndrmrtn/go-bolt v1.1.0-alpha h1:QGcrryQ39di8mVJoSI9sR1yNNgk+Ll8V/NY3iejdtRA=
-github.com/bndrmrtn/go-bolt v1.1.0-alpha/go.mod h1:96EKIgmzjJmd5XtgZchP6NWjT7H0/rkKJjgQCbXqj3A=
-github.com/bndrmrtn/go-bolt v1.1.0-beta h1:vWRnHdC4ielF45QH913tUduveNfKnR7tAv76Os1aPjY=
-github.com/bndrmrtn/go-bolt v1.1.0-beta/go.mod h1:9TPmRZQFsPrSHj8fVF6WC30h7UxnObHTzTYkjYk8am0=
+github.com/bndrmrtn/go-gale v1.0.0-alpha h1:yjL452DY76TFTWvlkQjlacws7N+Fjn2XNaDYmv7Nrno=
+github.com/bndrmrtn/go-gale v1.0.0-alpha/go.mod h1:jHndmg+dzoqwtgn6Lhr4VFqDYKMjbNytAlScGknBQ1A=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=
@@ -62,8 +54,6 @@ golang.org/x/sys v0.0.0-20210331175145-43e1dd70ce54/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
-golang.org/x/sys v0.25.0 h1:r+8e+loiHxRqhXVl6ML1nO3l1+oFoWbnlu2Ehimmi34=
-golang.org/x/sys v0.25.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/sys v0.26.0 h1:KHjCJyddX0LoSTb3J+vWpupP9p0oznkqVk/IfjymZbo=
 golang.org/x/sys v0.26.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=

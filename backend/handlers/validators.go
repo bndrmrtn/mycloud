@@ -5,16 +5,16 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/bndrmrtn/go-bolt"
+	"github.com/bndrmrtn/go-gale"
 )
 
 func validateFileName(name string) error {
 	if len(name) > 50 {
-		return bolt.NewError(http.StatusBadRequest, "File name is too long")
+		return gale.NewError(http.StatusBadRequest, "File name is too long")
 	}
 
 	if strings.Contains(name, "/") {
-		return bolt.NewError(http.StatusBadRequest, "File name cannot contain slashes")
+		return gale.NewError(http.StatusBadRequest, "File name cannot contain slashes")
 	}
 
 	return nil

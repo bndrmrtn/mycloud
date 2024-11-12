@@ -1,16 +1,14 @@
 package repository
 
 import (
-	"net"
-
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"gorm.io/gorm"
 )
 
-func NewSession(db *gorm.DB, userID string, ipAddr net.IP, agent string) (models.Session, error) {
+func NewSession(db *gorm.DB, userID string, ipAddr string, agent string) (models.Session, error) {
 	var session = models.Session{
 		HasUser:   models.HasUserID(userID),
-		IP:        ipAddr.String(),
+		IP:        ipAddr,
 		UserAgent: agent,
 	}
 	result := db.Create(&session)

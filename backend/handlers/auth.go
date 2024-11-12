@@ -6,7 +6,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/bndrmrtn/go-bolt"
+	"github.com/bndrmrtn/go-gale"
 	"github.com/bndrmrtn/my-cloud/config"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
@@ -16,14 +16,14 @@ import (
 	"gorm.io/gorm"
 )
 
-func HandleCreateAuthURL(c bolt.Ctx) error {
+func HandleCreateAuthURL(c gale.Ctx) error {
 	state := utils.NewRandom().String(10)
 	c.Session().Set("auth_state", []byte(state))
 
 	conf := config.GoogleOAuth()
 	url := conf.AuthCodeURL(state)
 
-	return c.JSON(bolt.Map{
+	return c.JSON(gale.Map{
 		"redirect_url": url,
 	})
 }
@@ -36,8 +36,8 @@ type GoogleUser struct {
 	Picture       string `json:"picture"`
 }
 
-func HandleAuthUser(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc {
-	return func(c bolt.Ctx) error {
+func HandleAuthUser(db *gorm.DB, svc services.StorageService) gale.HandlerFunc {
+	return func(c gale.Ctx) error {
 		state, err := c.Session().Get("auth_state")
 
 		if err != nil {
@@ -45,7 +45,7 @@ func HandleAuthUser(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc {
 		}
 
 		if string(state) != c.URL().Query().Get("state") {
-			return bolt.NewError(http.StatusNotAcceptable, "Invalid state parameter")
+			return gale.NewError(http.StatusNotAcceptable, "Invalid state parameter")
 		}
 
 		_ = c.Session().Delete("auth_state")
@@ -54,37 +54,37 @@ func HandleAuthUser(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc {
 
 		token, err := conf.Exchange(context.Background(), c.URL().Query().Get("code"))
 		if err != nil {
-			return bolt.NewError(http.StatusNotAcceptable, "Failed to exchange token")
+			return gale.NewError(http.StatusNotAcceptable, "Failed to exchange token")
 		}
 
 		resp, err := http.Get("https://www.googleapis.com/oauth2/v2/userinfo?access_token=" + token.AccessToken)
 		if err != nil {
-			return bolt.NewError(http.StatusInternalServerError, "User Data Fetch Failed")
+			return gale.NewError(http.StatusInternalServerError, "User Data Fetch Failed")
 		}
 
 		userDataB, err := io.ReadAll(resp.Body)
 		if err != nil {
-			return bolt.NewError(http.StatusInternalServerError, "JSON Reading Failed")
+			return gale.NewError(http.StatusInternalServerError, "JSON Reading Failed")
 		}
 
 		var userData GoogleUser
 		err = json.Unmarshal(userDataB, &userData)
 		if err != nil {
-			return bolt.NewError(http.StatusInternalServerError, "JSON Unmarshal Failed")
+			return gale.NewError(http.StatusInternalServerError, "JSON Unmarshal Failed")
 		}
 
 		if !userData.VerifiedEmail {
-			return bolt.NewError(http.StatusNotAcceptable, "Email is not verified")
+			return gale.NewError(http.StatusNotAcceptable, "Email is not verified")
 		}
 
 		user, err := repository.FindUserByEmail(db, userData.Email)
 		if err != nil {
-			return bolt.NewError(http.StatusNotFound, "User not found")
+			return gale.NewError(http.StatusNotFound, "User not found")
 		}
 
 		session, err := repository.NewSession(db, user.ID, c.IP(), c.Request().UserAgent())
 		if err != nil {
-			return bolt.NewError(http.StatusInternalServerError, "Session creation failed")
+			return gale.NewError(http.StatusInternalServerError, "Session creation failed")
 		}
 
 		if err = c.Session().Set(utils.AuthSessionKey, []byte(session.ID)); err != nil {
@@ -98,14 +98,14 @@ func HandleAuthUser(db *gorm.DB, svc services.StorageService) bolt.HandlerFunc {
 			}
 		}()
 
-		return c.JSON(bolt.Map{
+		return c.JSON(gale.Map{
 			"user":    user,
 			"session": session,
 		})
 	}
 }
 
-func HandleGetAuthUser(c bolt.Ctx) error {
+func HandleGetAuthUser(c gale.Ctx) error {
 	user, err := ctxUser(c)
 	if err != nil {
 		return err
@@ -113,7 +113,7 @@ func HandleGetAuthUser(c bolt.Ctx) error {
 	return c.JSON(user)
 }
 
-func HandleLogout(c bolt.Ctx) error {
+func HandleLogout(c gale.Ctx) error {
 	return c.Session().Destroy()
 }
 

@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/bndrmrtn/go-bolt"
+	"github.com/bndrmrtn/go-gale"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
 	"github.com/bndrmrtn/my-cloud/services"
@@ -17,8 +17,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws bolt.WSServer) bolt.HandlerFunc {
-	return func(c bolt.Ctx) error {
+func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws gale.WSServer) gale.HandlerFunc {
+	return func(c gale.Ctx) error {
 		userID, err := ctxUserID(c)
 		if err != nil {
 			return err
@@ -30,11 +30,11 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws bolt.WSServe
 		}
 
 		// Prepare the download and notify the user
-		go func(db *gorm.DB, ws bolt.WSServer, tmpFile, spaceID, userID, path, reqID string) (err error) {
+		go func(db *gorm.DB, ws gale.WSServer, tmpFile, spaceID, userID, path, reqID string) (err error) {
 			defer func() {
 				if err != nil {
 					logrus.Error("Failed to download directory", err)
-					wsWriter(ws, userID, bolt.Map{
+					wsWriter(ws, userID, gale.Map{
 						"error": err.Error(),
 					})
 				}
@@ -90,7 +90,7 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws bolt.WSServe
 			}
 			db.Create(&download)
 
-			return wsWriter(ws, userID, bolt.Map{
+			return wsWriter(ws, userID, gale.Map{
 				"type":            "download_request_finished",
 				"request_id":      reqID,
 				"download_id":     download.ID,
@@ -98,7 +98,7 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws bolt.WSServe
 			})
 		}(db, ws, filepath.Join(svc.GetTmpDir(), uuid.New().String()+".zip"), space.ID, userID, queryPath(c), c.ID())
 
-		return c.Status(http.StatusAccepted).JSON(bolt.Map{
+		return c.Status(http.StatusAccepted).JSON(gale.Map{
 			"accapted":   true,
 			"request_id": c.ID(),
 		})

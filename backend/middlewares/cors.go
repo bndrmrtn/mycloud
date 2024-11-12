@@ -1,21 +1,17 @@
 package middlewares
 
-import (
-	"net/http"
+import "github.com/bndrmrtn/go-gale"
 
-	"github.com/bndrmrtn/go-bolt"
-)
-
-func CORSMiddleware(c bolt.Ctx) (bool, error) {
+func CORSMiddleware(c gale.Ctx) error {
 	c.Header().Add("Access-Control-Allow-Origin", "http://localhost:3000")
 	c.Header().Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 	c.Header().Add("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	c.Header().Add("Access-Control-Allow-Credentials", "true")
 
 	if c.Method() == "OPTIONS" {
-		c.Status(204) // No Content
-		return false, bolt.NewError(http.StatusOK, "")
+		c.Status(204).Break() // No Content
+		return nil
 	}
 
-	return true, nil
+	return nil
 }

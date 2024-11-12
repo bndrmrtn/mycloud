@@ -2,10 +2,9 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
-	"github.com/bndrmrtn/go-bolt"
+	"github.com/bndrmrtn/go-gale"
 	"github.com/bndrmrtn/my-cloud/config"
 	"github.com/bndrmrtn/my-cloud/handlers"
 	"github.com/bndrmrtn/my-cloud/middlewares"
@@ -13,30 +12,22 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewApiServer(db *gorm.DB, store bolt.SessionStore, svc services.StorageService) *bolt.Bolt {
+func NewApiServer(db *gorm.DB, store gale.SessionStore, svc services.StorageService) *gale.Gale {
 	conf := config.Api(store)
 	conf.Mode = config.Mode()
 
-	app := bolt.New(&conf)
+	app := gale.New(&conf)
 	ws := NewWSServer(app, db)
 
 	registerValidators(app.CompleteRouter)
 
-	app.Hook(bolt.EveryRequestHook, func(c bolt.Ctx) error {
-		ok, err := middlewares.CORSMiddleware(c)
-		fmt.Println("CORS", ok, err)
-		if !ok {
-			return errors.New("failed to handle CORS")
-		}
-		return err
-	})
-	registerRoutes(app, db, store, svc, ws)
+	registerRoutes(app.Group("/", middlewares.CORSMiddleware), db, store, svc, ws)
 
 	app.Dump()
 	return app
 }
 
-func registerRoutes(r bolt.Router, db *gorm.DB, store bolt.SessionStore, svc services.StorageService, ws bolt.WSServer) {
+func registerRoutes(r gale.Router, db *gorm.DB, store gale.SessionStore, svc services.StorageService, ws gale.WSServer) {
 	r.Get("/auth-redirect", handlers.HandleCreateAuthURL).Name("auth.redirect")
 	r.Get("/gauth", handlers.HandleAuthUser(db, svc)).Name("auth.google")
 	r.Get("/profileimage/{id@png}", handlers.HandleGetProfileImage(db, svc, store)).Name("cdn.profileimage")
@@ -73,7 +64,7 @@ func registerRoutes(r bolt.Router, db *gorm.DB, store bolt.SessionStore, svc ser
 	}
 }
 
-func registerValidators(r bolt.CompleteRouter) {
+func registerValidators(r gale.RouterParamValidator) {
 	r.RegisterRouteParamValidator("png", func(value string) (string, error) {
 		strs := strings.SplitN(value, ".", 2)
 		if strs[len(strs)-1] != "png" {
