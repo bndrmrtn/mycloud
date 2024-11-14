@@ -20,8 +20,15 @@ func NewApiServer(db *gorm.DB, store gale.SessionStore, svc services.StorageServ
 	ws := NewWSServer(app, db)
 
 	registerValidators(app.CompleteRouter)
-
 	registerRoutes(app.Group("/", middlewares.CORSMiddleware), db, store, svc, ws)
+
+	// Add devtools in development mode
+	if conf.Mode == gale.Development {
+		app.Use(gale.NewUIDevtools())
+	}
+
+	// Register pprof routes
+	middlewares.RegisterPprof(app.Router())
 
 	app.Dump()
 	return app

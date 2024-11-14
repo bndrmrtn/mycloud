@@ -3,7 +3,7 @@ module github.com/bndrmrtn/my-cloud
 go 1.22.7
 
 require (
-	github.com/bndrmrtn/go-gale v1.0.0-alpha
+	github.com/bndrmrtn/go-gale v1.0.0-beta
 	github.com/google/uuid v1.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.7.0

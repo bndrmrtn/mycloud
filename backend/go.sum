@@ -2,6 +2,8 @@ cloud.google.com/go/compute/metadata v0.3.0 h1:Tz+eQXMEqDIKRsmY3cHTL6FVaynIjX2Qx
 cloud.google.com/go/compute/metadata v0.3.0/go.mod h1:zFmK7XCadkQkj6TtorcaGlCW1hT1fIilQDwofLpJ20k=
 github.com/bndrmrtn/go-gale v1.0.0-alpha h1:yjL452DY76TFTWvlkQjlacws7N+Fjn2XNaDYmv7Nrno=
 github.com/bndrmrtn/go-gale v1.0.0-alpha/go.mod h1:jHndmg+dzoqwtgn6Lhr4VFqDYKMjbNytAlScGknBQ1A=
+github.com/bndrmrtn/go-gale v1.0.0-beta h1:AJT7a+u0l2iYjZvDdr539GWa1mY60igeIgEprhTWsh8=
+github.com/bndrmrtn/go-gale v1.0.0-beta/go.mod h1:jHndmg+dzoqwtgn6Lhr4VFqDYKMjbNytAlScGknBQ1A=
 github.com/bsm/ginkgo/v2 v2.12.0 h1:Ny8MWAHyOepLGlLKYmXG4IEkioBysk6GpaRTLC8zwWs=
 github.com/bsm/ginkgo/v2 v2.12.0/go.mod h1:SwYbGRRDovPVboqFv0tPTcG1sN61LM1Z4ARdbAV9g4c=
 github.com/bsm/gomega v1.27.10 h1:yeMWxP2pV2fG3FgAODIY8EiRE3dy0aeFYt4l7wh6yKA=
