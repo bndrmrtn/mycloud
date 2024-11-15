@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 
 	"github.com/bndrmrtn/go-gale"
@@ -12,7 +11,7 @@ import (
 )
 
 func NewWSServer(app *gale.Gale, db *gorm.DB) gale.WSServer {
-	server := gale.NewWSServer(context.Background())
+	server := gale.NewWSServer()
 
 	app.WS("/ws", func(conn gale.WSConn) {
 		user := conn.Ctx().Get(utils.RequestAuthUserKey)
