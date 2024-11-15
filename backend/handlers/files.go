@@ -8,6 +8,7 @@ import (
 	"github.com/bndrmrtn/my-cloud/database/repository"
 	"github.com/bndrmrtn/my-cloud/services"
 	"github.com/bndrmrtn/my-cloud/utils"
+	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
@@ -103,7 +104,7 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 			return err
 		}
 
-		wsWriter(ws, userID, gale.Map{
+		_ = wsWriter(ws, userID, gale.Map{
 			"type":          "space_file_upload_succeed",
 			"file_space_id": space.ID,
 		})
@@ -150,14 +151,17 @@ func HandleDeleteFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 		}
 
 		if can {
-			svc.Delete(file.OSFile)
+			err = svc.Delete(file.OSFile)
+			if err != nil {
+				logrus.Warn("failed to delete file", err)
+			}
 		}
 
 		if err := db.Delete(&file).Error; err != nil {
 			return err
 		}
 
-		wsWriter(ws, userID, gale.Map{
+		_ = wsWriter(ws, userID, gale.Map{
 			"type":          "space_file_delete_succeed",
 			"file_space_id": file.FileSpaceID,
 		})

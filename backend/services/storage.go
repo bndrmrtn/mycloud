@@ -157,6 +157,10 @@ func (s *StorageServiceV1) GetRealPath(f *models.OSFile) string {
 	return filepath.Join(s.datadir, f.Container, f.ID)
 }
 
+func (s *StorageServiceV1) Containers() int {
+	return len(s.containers)
+}
+
 func (s *StorageServiceV1) findContainer(size int64) (string, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()

@@ -33,27 +33,3 @@ func AuthMiddleware(db *gorm.DB) gale.MiddlewareFunc {
 		return nil
 	}
 }
-
-func WSAuthMiddleware(db *gorm.DB) gale.MiddlewareFunc {
-	return func(c gale.Ctx) error {
-		unauthorized := gale.NewError(http.StatusUnauthorized, "Unauthorized")
-		defer logrus.Info("Middleware: WSAuthMiddleware")
-
-		token, err := c.Session().From(c.URL().Query().Get("auth")).Get(utils.AuthSessionKey)
-		if err != nil {
-			return unauthorized
-		}
-
-		user, err := repository.FindUserBySessionID(db, string(token))
-		if err != nil {
-			return unauthorized
-		}
-
-		// Set user to context as a pointer
-		// This state can be accessed by any upcoming handler
-		// The data will be dropped after the request is done
-		c.Set(utils.RequestAuthUserKey, &user)
-
-		return nil
-	}
-}

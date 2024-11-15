@@ -13,6 +13,6 @@ func FindOSFileByHash(db *gorm.DB, h string) (*models.OSFile, error) {
 
 func CanDeleteOSFile(db *gorm.DB, osFileID string) (bool, error) {
 	var files int64
-	result := db.Model(&models.File{}).InnerJoins("OSFile").Where("os_files.id = ?", osFileID).Limit(2).Count(&files)
+	result := db.Model(&models.File{}).InnerJoins("OSFile").Where("OSFile.id = ?", osFileID).Limit(2).Count(&files)
 	return files < 2, result.Error
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/bndrmrtn/my-cloud/database"
 	"github.com/bndrmrtn/my-cloud/implementations"
 	"github.com/bndrmrtn/my-cloud/services"
-	"gorm.io/gorm/logger"
 )
 
 var listenAddr = flag.String("listenAddr", ":3000", "The address to listen on for HTTP requests.")
@@ -24,7 +23,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db, err := database.New(logger.Info)
+	db, err := database.New(config.DBLogLevel())
 	if err != nil {
 		log.Fatalf("failed to connect to the database: %v\n", err)
 	}

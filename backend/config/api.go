@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/bndrmrtn/go-gale"
+	"github.com/coder/websocket"
 	"github.com/google/uuid"
 )
 
@@ -32,6 +33,11 @@ func Api(store gale.SessionStore) gale.Config {
 				return cookie.Value, nil
 			},
 			Store: store,
+		},
+		Websocket: &gale.WSConfig{
+			AcceptOptions: &websocket.AcceptOptions{
+				InsecureSkipVerify: true,
+			},
 		},
 	}
 }

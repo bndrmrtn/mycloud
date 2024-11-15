@@ -37,20 +37,40 @@ func GetSpaceFiles(db *gorm.DB, spaceID string, dir string) ([]models.File, erro
 
 func GetAllSpaceFiles(db *gorm.DB, spaceID string, dir string) ([]models.File, error) {
 	var files []models.File
-	result := db.Model(&models.File{}).Where("file_space_id = ? and directory like ?", spaceID, dir+"%").Preload("OSFile").Find(&files)
+	result := db.Model(&models.File{}).Where("file_space_id = ? and (file == ? or directory like ?)", spaceID, dir, dir+"/%").Preload("OSFile").Find(&files)
 	return files, result.Error
 }
 
+// GetSpaceFS returns the next directories in the given directory
+//
+// ChatGPT's help: https://chatgpt.com/share/673784f7-5224-8010-a870-025fb7fdd0db
 func GetSpaceFS(db *gorm.DB, spaceID string, dir string) ([]string, error) {
-	var files []string
+	var directories []string
 	result := db.Raw(`
 		SELECT DISTINCT
-            SUBSTRING_INDEX(SUBSTRING_INDEX(directory, '/', LENGTH(TRIM(TRAILING '/' FROM ?)) - LENGTH(REPLACE(TRIM(TRAILING '/' FROM ?), '/', '')) + 2), '/', -1) AS next_directory
-        FROM files
-        WHERE directory LIKE CONCAT(TRIM(TRAILING '/' FROM ?), '/%')
-            AND directory != '/'
-            AND file_space_id = ?
-            AND LENGTH(TRIM(TRAILING '/' FROM ?)) < LENGTH(REPLACE(TRIM(TRAILING '/' FROM directory), '/', ''));
-		`, dir, dir, dir, spaceID, dir).Find(&files)
-	return files, result.Error
+			SUBSTRING_INDEX(
+				SUBSTRING_INDEX(directory, '/',
+					CASE
+						WHEN ? = '/' THEN 2
+						ELSE LENGTH(?) - LENGTH(REPLACE(?, '/', '')) + 2
+					END
+				),
+				'/',
+				-1
+			) AS next_directory
+		FROM files
+		WHERE
+			(directory LIKE CONCAT(TRIM(TRAILING '/' FROM ?), '/%') OR ? = '/')
+			AND directory != ?
+			AND file_space_id = ?
+			AND LENGTH(directory) > LENGTH(TRIM(TRAILING '/' FROM ?))
+			AND SUBSTRING_INDEX(directory, '/',
+				CASE
+					WHEN ? = '/' THEN 2
+					ELSE LENGTH(?) - LENGTH(REPLACE(?, '/', '')) + 2
+				END
+			) != '';
+	`, dir, dir, dir, dir, dir, dir, spaceID, dir, dir, dir, dir).Find(&directories)
+
+	return directories, result.Error
 }

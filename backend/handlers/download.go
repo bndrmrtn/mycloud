@@ -30,11 +30,13 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws gale.WSServe
 		}
 
 		// Prepare the download and notify the user
-		go func(db *gorm.DB, ws gale.WSServer, tmpFile, spaceID, userID, path, reqID string) (err error) {
+		go func(db *gorm.DB, ws gale.WSServer, tmpFile, spaceID, userID, path, reqID string) {
+			var err error
+
 			defer func() {
 				if err != nil {
 					logrus.Error("Failed to download directory", err)
-					wsWriter(ws, userID, gale.Map{
+					_ = wsWriter(ws, userID, gale.Map{
 						"error": err.Error(),
 					})
 				}
@@ -76,11 +78,11 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws gale.WSServe
 			}
 
 			if err = zw.Close(); err != nil {
-				return err
+				return
 			}
 
 			if err = z.Close(); err != nil {
-				return err
+				return
 			}
 
 			download := models.Download{
@@ -88,9 +90,12 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws gale.WSServe
 				Path:    tmpFile,
 				Expiry:  time.Now().Add(time.Hour * 24),
 			}
-			db.Create(&download)
 
-			return wsWriter(ws, userID, gale.Map{
+			if err = db.Create(&download).Error; err != nil {
+				return
+			}
+
+			err = wsWriter(ws, userID, gale.Map{
 				"type":            "download_request_finished",
 				"request_id":      reqID,
 				"download_id":     download.ID,

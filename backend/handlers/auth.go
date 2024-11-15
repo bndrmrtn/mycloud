@@ -18,7 +18,9 @@ import (
 
 func HandleCreateAuthURL(c gale.Ctx) error {
 	state := utils.NewRandom().String(10)
-	c.Session().Set("auth_state", []byte(state))
+	if err := c.Session().Set("auth_state", []byte(state)); err != nil {
+		return err
+	}
 
 	conf := config.GoogleOAuth()
 	url := conf.AuthCodeURL(state)

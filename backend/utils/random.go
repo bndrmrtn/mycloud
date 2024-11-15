@@ -10,9 +10,9 @@ type Random struct {
 	random *rand.Rand
 }
 
-func NewRandom() Random {
+func NewRandom() *Random {
 	source := rand.NewSource(time.Now().UnixNano())
-	return Random{
+	return &Random{
 		random: rand.New(source),
 	}
 }
