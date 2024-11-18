@@ -50,7 +50,7 @@ func HandleCreateSpace(db *gorm.DB) gale.HandlerFunc {
 		}
 		db.Create(&space)
 
-		return c.JSON(space)
+		return c.JSON(space.WithSize(0))
 	}
 }
 

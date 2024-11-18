@@ -24,13 +24,13 @@ const emit = defineEmits(['close', 'finish'])
 
 const submit = async () => {
   processing.value = true
-  const space = await space(spaceName.value)
+  const sp = await space(spaceName.value)
   processing.value = false
 
-  if(space instanceof Error) return process.client ? useToast().error(space.message) : null
+  if(sp instanceof Error) return process.client ? useToast().error(sp.message) : null
 
   spaceName.value = ''
-  emit('finish', space)
+  emit('finish', sp)
   emit('close')
 }
 </script>

@@ -11,9 +11,31 @@ Clone the repository.
 git clone https://github.com/bndrmrtn/mycloud.git
 ```
 
+## Configuration
+
+Under the backend directory, modify the `config.yaml` file to configure the application.
+
+```yaml
+service:
+  version: "1"
+  appdata_dir: "mycloud-appdata"
+application:
+  authorization:
+    use_whitelist: false
+    use_blacklist: false
+    admin:
+      primary_admin_email: "your@email.com" # Replace with your email
+      enable_multi_admin: true
+```
+
+This configuration file allows you to configure the application version, the directory where the application data will be stored, and the authorization settings.
+**NOTE: When both use_whitelist and use_blacklist are set to false, all users will be able to access the application.**
+
+## Usage
+
 Use docker compose to build and run the application.
 ```bash
 docker compose up
 ```
 
-The application will be running on `http://localhost:3000`.
+To use MyCloud, simply navigate to `http://localhost:3000` in your web browser and you are ready to go. 🚀

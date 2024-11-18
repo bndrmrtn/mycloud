@@ -10,9 +10,11 @@ import (
 	"gorm.io/gorm"
 )
 
+// NewWSServer creates a new WebSocket server
 func NewWSServer(app *gale.Gale, db *gorm.DB) gale.WSServer {
 	server := gale.NewWSServer()
 
+	// Register the WebSocket server endpoint
 	app.WS("/ws", func(conn gale.WSConn) {
 		user := conn.Ctx().Get(utils.RequestAuthUserKey)
 		if user == nil {
@@ -24,6 +26,8 @@ func NewWSServer(app *gale.Gale, db *gorm.DB) gale.WSServer {
 		server.AddConn(conn)
 	}, middlewares.AuthMiddleware(db)).Name("ws")
 
+	// Handle incoming messages
+	// Reply to ping messages
 	server.OnMessage(func(s gale.WSServer, conn gale.WSConn, msg []byte) error {
 		type EchoMsg struct {
 			Type string `json:"type"`

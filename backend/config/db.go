@@ -2,12 +2,13 @@ package config
 
 import (
 	"os"
+	"strings"
 
 	"gorm.io/gorm/logger"
 )
 
 func DBLogLevel() logger.LogLevel {
-	lvl := os.Getenv("DB_LOG_LEVEL")
+	lvl := strings.ToUpper(os.Getenv("DB_LOG_LEVEL"))
 	switch lvl {
 	case "SILENT":
 		return logger.Silent

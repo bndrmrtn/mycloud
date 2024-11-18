@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func NewApiServer(db *gorm.DB, store gale.SessionStore, svc services.StorageService) *gale.Gale {
+func NewApiServer(appConf *config.AppConfig, db *gorm.DB, store gale.SessionStore, svc services.StorageService) *gale.Gale {
 	conf := config.Api(store)
 	conf.Mode = config.Mode()
 
@@ -20,7 +20,7 @@ func NewApiServer(db *gorm.DB, store gale.SessionStore, svc services.StorageServ
 	ws := NewWSServer(app, db)
 
 	registerValidators(app.CompleteRouter)
-	registerRoutes(app.Group("/", middlewares.CORSMiddleware), db, store, svc, ws)
+	registerRoutes(app.Group("/", middlewares.CORSMiddleware), appConf, db, store, svc, ws)
 
 	if conf.Mode == gale.Development {
 		// Add devtools in development mode
@@ -34,9 +34,11 @@ func NewApiServer(db *gorm.DB, store gale.SessionStore, svc services.StorageServ
 	return app
 }
 
-func registerRoutes(r gale.Router, db *gorm.DB, store gale.SessionStore, svc services.StorageService, ws gale.WSServer) {
+func registerRoutes(r gale.Router, conf *config.AppConfig, db *gorm.DB, store gale.SessionStore, svc services.StorageService, ws gale.WSServer) {
+	r.Get("/", handlers.HandleIndexRoute(conf)).Name("index")
+
 	r.Get("/auth-redirect", handlers.HandleCreateAuthURL).Name("auth.redirect")
-	r.Get("/gauth", handlers.HandleAuthUser(db, svc)).Name("auth.google")
+	r.Get("/gauth", handlers.HandleAuthUser(db, svc, &conf.Application.Authorization)).Name("auth.google")
 	r.Get("/profileimage/{id@png}", handlers.HandleGetProfileImage(db, svc, store)).Name("cdn.profileimage")
 
 	auth := r.Group("/", middlewares.AuthMiddleware(db))
@@ -68,6 +70,20 @@ func registerRoutes(r gale.Router, db *gorm.DB, store gale.SessionStore, svc ser
 		files.Get("/", handlers.HandleGetFile(db, svc)).Name("files.get")
 		files.Delete("/", handlers.HandleDeleteFile(db, svc, ws)).Name("files.delete")
 		files.Put("/", handlers.HandleUpdateFileInfo(db)).Name("files.update")
+	}
+
+	admin := auth.Group("/admin", middlewares.AdminMiddleware(db))
+
+	admin.Get("/users", handlers.HandleAdminGetUsers(db))
+	if conf.Application.Authorization.Admin.EnableMultiAdmin {
+		admin.Get("/admins", handlers.HandleAdminGetUsers(db.Where("role = ?", "admin")))
+	}
+
+	if conf.Application.Authorization.UseWhitelist {
+		admin.Get("/whitelist", handlers.HandleAdminGetWhitelist(db))
+	}
+	if conf.Application.Authorization.UseBlacklist {
+		admin.Get("/blacklist", handlers.HandleAdminGetBlacklist(db))
 	}
 }
 

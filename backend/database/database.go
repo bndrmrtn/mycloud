@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/bndrmrtn/my-cloud/database/models"
-	"github.com/bndrmrtn/my-cloud/database/repository"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -32,19 +31,12 @@ func New(loglevel logger.LogLevel) (*gorm.DB, error) {
 		&models.OSFile{},
 		&models.Download{},
 		&models.ImageURL{},
+		&models.UserWhitelist{},
+		&models.UserBlacklist{},
 	)
 
 	if err != nil {
 		return nil, fmt.Errorf("Failed to migrate: " + err.Error())
-	}
-
-	// Create default user
-	if _, err := repository.FindUserByEmail(db, "bndrmrtn@gmail.com"); err != nil {
-		db.Create(&models.User{
-			GID:   "109749750435450153357",
-			Name:  "Martin Binder",
-			Email: "bndrmrtn@gmail.com",
-		})
 	}
 
 	return db, nil

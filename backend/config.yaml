@@ -1,0 +1,11 @@
+# MyCloud config - Read more: https://cloud.mrtn.vip/docs/config
+service:
+  version: "1"
+  appdata_dir: "mycloud-appdata"
+application:
+  authorization:
+    use_whitelist: false
+    use_blacklist: false
+    admin:
+      primary_admin_email: "your@email.com" # Replace with your email
+      enable_multi_admin: true

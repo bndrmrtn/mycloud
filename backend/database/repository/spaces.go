@@ -5,8 +5,8 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetAllSpacesForUser(db *gorm.DB, userID string) ([]models.FileSpace, error) {
-	var spaces []models.FileSpace
+func GetAllSpacesForUser(db *gorm.DB, userID string) ([]models.FileSpaceWithSize, error) {
+	var spaces []models.FileSpaceWithSize
 	result := db.Raw(`
 		select
 			file_spaces.id as id,
@@ -15,8 +15,8 @@ func GetAllSpacesForUser(db *gorm.DB, userID string) ([]models.FileSpace, error)
 			file_spaces.name as name,
 			sum(os_files.file_size) as size
 		from file_spaces
-		inner join files on files.file_space_id = file_spaces.id
-		inner join os_files on os_files.id = files.os_file_id
+		left join files on files.file_space_id = file_spaces.id
+		left join os_files on os_files.id = files.os_file_id
 		where file_spaces.user_id = ?
 		group by file_spaces.id
 	`, userID).Find(&spaces)

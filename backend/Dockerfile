@@ -3,12 +3,14 @@ FROM golang:1.22.7-alpine AS build
 
 WORKDIR /app
 
+COPY config.yaml ./
+
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
 
-RUN go build -o bin/cloud
+RUN go build -o bin/mycloud
 
 # Run the tests
 FROM build AS run-test
@@ -19,6 +21,7 @@ FROM alpine:latest AS run
 
 WORKDIR /app
 
-COPY --from=build /app /app
+COPY --from=build /app/bin /app
+COPY --from=build /app/config.yaml /app/config.yaml
 
-CMD ["./bin/cloud", "-"]
+CMD ["./mycloud", "-"]
