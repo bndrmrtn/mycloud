@@ -113,7 +113,7 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 	}
 }
 
-func HandleGetCodeFileContent(db *gorm.DB, svc services.StorageService) gale.HandlerFunc {
+func HandleGetFile(db *gorm.DB, svc services.StorageService) gale.HandlerFunc {
 	return func(c gale.Ctx) error {
 		file, err := ctxSpaceFile(c)
 		if err != nil {
@@ -121,15 +121,12 @@ func HandleGetCodeFileContent(db *gorm.DB, svc services.StorageService) gale.Han
 		}
 
 		if file.OSFile.FileSize > 5*utils.MB {
-			return gale.NewError(http.StatusBadRequest, "File is too big")
+			return gale.NewError(http.StatusBadRequest, "file size exceeded the 5mb limit")
 		}
 
-		content, err := svc.ReadFile(file.OSFile)
-		if err != nil {
-			return err
-		}
+		path := svc.GetRealPath(file.OSFile)
 
-		return c.ContentType(gale.ContentTypeText).Send(content)
+		return c.ContentType(file.OSFile.Type).SendFile(path)
 	}
 }
 

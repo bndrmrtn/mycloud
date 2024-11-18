@@ -1,2 +1,7 @@
+# Env files
 .env
 .env.*
+
+# Other container data
+mysql-data
+redis-data

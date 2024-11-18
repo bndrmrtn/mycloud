@@ -26,8 +26,8 @@ func (r *RedisSessionStore) Get(key string) ([]byte, error) {
 }
 
 func (r *RedisSessionStore) Exists(key string) bool {
-	_, err := r.client.Exists(r.ctx, key).Result()
-	return err == nil
+	ok, err := r.client.Exists(r.ctx, key).Result()
+	return ok > 0 && err == nil
 }
 
 func (r *RedisSessionStore) Set(key string, val []byte) error {

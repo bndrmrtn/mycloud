@@ -65,7 +65,7 @@ func registerRoutes(r gale.Router, db *gorm.DB, store gale.SessionStore, svc ser
 	// Manage files in a space
 	files := auth.Group("/files/{file_id@uuid}", middlewares.FileMiddleware(db, "file_id"))
 	{
-		files.Get("/", handlers.HandleGetCodeFileContent(db, svc)).Name("files.get")
+		files.Get("/", handlers.HandleGetFile(db, svc)).Name("files.get")
 		files.Delete("/", handlers.HandleDeleteFile(db, svc, ws)).Name("files.delete")
 		files.Put("/", handlers.HandleUpdateFileInfo(db)).Name("files.update")
 	}
