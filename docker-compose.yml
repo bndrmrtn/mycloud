@@ -48,7 +48,7 @@ services:
     build: .
     container_name: mycloud-nginx
     ports:
-      - 3000:80
+      - "${HOST_PORT:-3000}:80"
     depends_on:
       - frontend
       - backend

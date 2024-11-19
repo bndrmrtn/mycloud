@@ -18,5 +18,6 @@ type User struct {
 	// Image is the image url of the user
 	Image string `json:"image_url"`
 
-	Role Role `json:"role" gorm:"default:'user';type:enum('user','admin')"`
+	// SQLite does not support enum, so we need to use string
+	Role Role `json:"role" gorm:"default:'user'"`
 }
