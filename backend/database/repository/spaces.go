@@ -36,8 +36,16 @@ func GetSpaceFiles(db *gorm.DB, spaceID string, dir string) ([]models.File, erro
 }
 
 func GetAllSpaceFiles(db *gorm.DB, spaceID string, dir string) ([]models.File, error) {
-	var files []models.File
-	result := db.Model(&models.File{}).Where("file_space_id = ? and (file == ? or directory like ?)", spaceID, dir, dir+"/%").Preload("OSFile").Find(&files)
+	var (
+		files []models.File
+	)
+
+	dirPrefix := dir
+	if dir != "/" {
+		dirPrefix += "/"
+	}
+
+	result := db.Model(&models.File{}).Where("file_space_id = ? and (directory = ? or directory like ?)", spaceID, dir, dirPrefix+"%").Preload("OSFile").Find(&files)
 	return files, result.Error
 }
 

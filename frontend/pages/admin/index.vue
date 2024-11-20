@@ -40,8 +40,8 @@ onMounted(async () => {
       <h2 class="fredoka text-2xl mb-5">Manage</h2>
       <div class="md:grid md:grid-cols-2 md:gap-3">
         <div>
-          <ButtonsButtonBluish>Manage users</ButtonsButtonBluish>
-          <ButtonsButtonBluish v-if="conf.application.authorization.admin.enable_multi_admin" class="mt-3">Manage admins</ButtonsButtonBluish>
+          <ButtonsButtonBluish to="/admin/users">Manage users</ButtonsButtonBluish>
+          <ButtonsButtonBluish to="/admin/admins" v-if="conf.application.authorization.admin.enable_multi_admin" class="mt-3">Manage admins</ButtonsButtonBluish>
         </div>
         <div class="mt-3 md:mt-0">
           <ButtonsButtonBluish v-if="conf.application.authorization.use_whitelist">Manage whitelist</ButtonsButtonBluish>

@@ -5,9 +5,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func IsFileExists(db *gorm.DB, spaceID string, dir string, name string) (bool, error) {
+func IsFileExists(db *gorm.DB, spaceID, fileID, dir, name string) (bool, error) {
 	var count int64
-	result := db.Model(&models.File{}).Where("file_space_id = ? and directory = ? and file_name = ?", spaceID, dir, name).Count(&count)
+	result := db.Model(&models.File{}).Where("file_space_id = ? and id != ? and directory = ? and file_name = ?", spaceID, fileID, dir, name).Count(&count)
 	return count > 0, result.Error
 }
 

@@ -20,7 +20,11 @@ func NewApiServer(appConf *config.AppConfig, db *gorm.DB, store gale.SessionStor
 	ws := NewWSServer(app, db)
 
 	registerValidators(app.CompleteRouter)
-	registerRoutes(app.Group("/", middlewares.CORSMiddleware), appConf, db, store, svc, ws)
+
+	// Changed to a hook to run on every request
+	app.Hook(gale.EveryRequestHook, middlewares.CORSMiddleware)
+
+	registerRoutes(app, appConf, db, store, svc, ws)
 
 	if conf.Mode == gale.Development {
 		// Add devtools in development mode
@@ -69,12 +73,14 @@ func registerRoutes(r gale.Router, conf *config.AppConfig, db *gorm.DB, store ga
 	{
 		files.Get("/", handlers.HandleGetFile(db, svc)).Name("files.get")
 		files.Delete("/", handlers.HandleDeleteFile(db, svc, ws)).Name("files.delete")
-		files.Put("/", handlers.HandleUpdateFileInfo(db)).Name("files.update")
+		files.Put("/", handlers.HandleUpdateFileInfo(db, ws)).Name("files.update")
+		files.Get("/download", handlers.HandleDownloadFile(db, svc))
 	}
 
 	admin := auth.Group("/admin", middlewares.AdminMiddleware(db))
 
 	admin.Get("/users", handlers.HandleAdminGetUsers(db))
+	admin.Delete("/users/{userID@uuid}", handlers.HandleAdminDeleteUser(db, &conf.Application.Authorization.Admin))
 	if conf.Application.Authorization.Admin.EnableMultiAdmin {
 		admin.Get("/admins", handlers.HandleAdminGetUsers(db.Where("role = ?", "admin")))
 	}

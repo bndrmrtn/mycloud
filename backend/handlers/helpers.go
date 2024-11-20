@@ -6,8 +6,11 @@ import (
 	"path/filepath"
 
 	"github.com/bndrmrtn/go-gale"
+	"github.com/bndrmrtn/my-cloud/config"
 	"github.com/bndrmrtn/my-cloud/database/models"
+	"github.com/bndrmrtn/my-cloud/database/repository"
 	"github.com/bndrmrtn/my-cloud/utils"
+	"gorm.io/gorm"
 )
 
 func ctxUser(c gale.Ctx) (*models.User, error) {
@@ -66,4 +69,17 @@ func queryPath(c gale.Ctx) string {
 	}
 
 	return filepath.Clean(path)
+}
+
+func checkPrimaryAdmin(db *gorm.DB, id string, conf *config.AdminCofig) error {
+	user, err := repository.FindUserByID(db, id)
+	if err != nil {
+		return err
+	}
+
+	if user.Email == conf.PrimaryAdminEmail {
+		return gale.NewError(400, "You can't delete the primary admin")
+	}
+
+	return nil
 }

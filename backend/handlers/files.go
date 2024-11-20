@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/bndrmrtn/go-gale"
@@ -83,7 +84,7 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 			return err
 		}
 
-		exists, err := repository.IsFileExists(db, space.ID, dir, name)
+		exists, err := repository.IsFileExists(db, space.ID, "", dir, name)
 		if err != nil {
 			return err
 		}
@@ -104,10 +105,18 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 			return err
 		}
 
-		_ = wsWriter(ws, userID, gale.Map{
-			"type":          "space_file_upload_succeed",
-			"file_space_id": space.ID,
-		})
+		go func() {
+			file, err = repository.FindFileByID(db, file.ID)
+			if err != nil {
+				logrus.Warn("failed to find file", err)
+				return
+			}
+
+			_ = wsWriter(ws, userID, gale.Map{
+				"type": utils.WSFileUploadEvent,
+				"file": file,
+			})
+		}()
 
 		return c.JSON(file)
 	}
@@ -159,15 +168,15 @@ func HandleDeleteFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 		}
 
 		_ = wsWriter(ws, userID, gale.Map{
-			"type":          "space_file_delete_succeed",
-			"file_space_id": file.FileSpaceID,
+			"type":    utils.WSFileDeleteEvent,
+			"file_id": file.ID,
 		})
 
 		return c.JSON(gale.Map{"message": "File deleted"})
 	}
 }
 
-func HandleUpdateFileInfo(db *gorm.DB) gale.HandlerFunc {
+func HandleUpdateFileInfo(db *gorm.DB, ws gale.WSServer) gale.HandlerFunc {
 	return func(c gale.Ctx) error {
 		file, err := ctxSpaceFile(c)
 		if err != nil {
@@ -189,12 +198,12 @@ func HandleUpdateFileInfo(db *gorm.DB) gale.HandlerFunc {
 
 		data.Directory = validateDir(data.Directory)
 
-		ok, err := repository.IsFileExists(db, file.FileSpaceID, data.Directory, data.Name)
+		ok, err := repository.IsFileExists(db, file.FileSpaceID, file.ID, data.Directory, data.Name)
 		if err != nil {
 			return err
 		}
 
-		if !ok {
+		if ok {
 			return gale.NewError(http.StatusFound, "File already exists in this directory")
 		}
 
@@ -205,6 +214,29 @@ func HandleUpdateFileInfo(db *gorm.DB) gale.HandlerFunc {
 			return gale.NewError(http.StatusInternalServerError, "Failed to update file info")
 		}
 
+		go func() {
+			_ = wsWriter(ws, file.UserID, gale.Map{
+				"type": utils.WSFileUpdateEvent,
+				"file": file,
+			})
+		}()
+
 		return c.JSON(file)
+	}
+}
+
+func HandleDownloadFile(db *gorm.DB, svc services.StorageService) gale.HandlerFunc {
+	return func(c gale.Ctx) error {
+		file, err := ctxSpaceFile(c)
+		if err != nil {
+			return err
+		}
+
+		path := svc.GetRealPath(file.OSFile)
+
+		c.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", file.FileName))
+		c.Header().Add("Content-Type", "application/octet-stream")
+
+		return c.ContentType(file.OSFile.Type).SendFile(path)
 	}
 }

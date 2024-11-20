@@ -7,6 +7,7 @@ import SpaceLayout from "~/layouts/space.vue";
 import ReloadIcon from "~/components/icons/reload-icon.vue";
 import DownloadIcon from "~/components/icons/download-icon.vue";
 import {fetchDirs, fetchFiles, fetchSpace, requestSpaceDownload} from "~/scripts/space";
+import {useEventStore} from "~/stores/event";
 
 definePageMeta({
   middleware: ['space', 'auth'],
@@ -61,9 +62,33 @@ const fetchSpaceFiles = async () => {
   if(process.client) useToast().warning('Failed to fetch files')
 }
 
+const event = useEventStore()
+
 onMounted(async () => {
+  event.register('space_file_update', 'update-fs', (data: Record<string, any>): void => {
+    const fileData = (data as {file: SpaceFile}).file
+    const index = files.value.findIndex(file => file.id === fileData.id)
+    if(index != -1) files.value[index] = fileData
+  })
+
+  event.register('space_file_delete', 'delete-fs', (data: Record<string, any>): void => {
+    const id = data['file_id'] as string
+    files.value = files.value.filter(file => file.id != id)
+  })
+
+  event.register('space_file_upload', 'upload-fs', (data: Record<string, any>): void => {
+    const fileData = (data as {file: SpaceFile}).file
+    if(fileData?.directory == dir()) files.value.push(fileData)
+  })
+
   await fetchSpaceName()
   await load()
+})
+
+onUnmounted(() => {
+  event.detach('space_file_update', 'update-fs')
+  event.detach('space_file_delete', 'delete-fs')
+  event.detach('space_file_upload', 'upload-fs')
 })
 
 const load = async (reload: boolean = false) => {

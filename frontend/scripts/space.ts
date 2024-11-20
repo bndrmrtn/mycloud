@@ -116,7 +116,10 @@ export const deleteFile = async (fileID: string): Promise<Error | null> => {
 
 export const updateFileInfo = async (fileID: string, name: string, dir: string): Promise<Error | null> => {
     try {
-        const res = await newRequest(`/files/${fileID}`, {method: 'PUT'})
+        const res = await newRequest(`/files/${fileID}`, {
+            method: 'PUT',
+            body: JSON.stringify({name, dir})
+        })
         const data = await res.json()
 
         if(res.status != 200) {

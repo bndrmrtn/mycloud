@@ -38,3 +38,9 @@ func PaginateUsers(db *gorm.DB, cursor string) (*paginator.Pagination[models.Use
 
 	return data, nil
 }
+
+func FindUserByID(db *gorm.DB, id string) (models.User, error) {
+	var user models.User
+	result := db.Where("id = ?", id).First(&user)
+	return user, result.Error
+}

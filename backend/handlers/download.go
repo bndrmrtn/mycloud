@@ -12,6 +12,7 @@ import (
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
 	"github.com/bndrmrtn/my-cloud/services"
+	"github.com/bndrmrtn/my-cloud/utils"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
@@ -44,7 +45,7 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws gale.WSServe
 
 			files, err := repository.GetAllSpaceFiles(db, spaceID, path)
 			if err != nil {
-				logrus.Fatal("Failed to get space files")
+				logrus.Error("Failed to get space files")
 				return
 			}
 
@@ -96,7 +97,7 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws gale.WSServe
 			}
 
 			err = wsWriter(ws, userID, gale.Map{
-				"type":            "download_request_finished",
+				"type":            utils.WSDownloadRequestEvent,
 				"request_id":      reqID,
 				"download_id":     download.ID,
 				"download_expiry": download.Expiry,

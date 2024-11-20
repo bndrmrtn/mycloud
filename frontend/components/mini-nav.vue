@@ -5,6 +5,7 @@ import PlanetIcon from "~/components/icons/planet-icon.vue";
 import SpinnerIcon from "~/components/icons/spinner-icon.vue";
 import {useRouter} from "#app";
 import LogoutModal from "~/components/modals/logout-modal.vue";
+import ShieldIcon from "~/components/icons/shield-icon.vue";
 
 const router = useRouter()
 const env = useRuntimeConfig()
@@ -28,6 +29,10 @@ const logout = ref(false)
 
         <RouterLink to="/spaces" v-tooltip="'Spaces'" class="link">
           <PlanetIcon />
+        </RouterLink>
+
+        <RouterLink v-if="auth.user.role == 'admin'" to="/admin" v-tooltip="'Admin dashboard'" class="link">
+          <ShieldIcon />
         </RouterLink>
 
         <button @click="logout = true" v-tooltip="'Logout'" class="link">

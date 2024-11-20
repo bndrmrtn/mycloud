@@ -14,6 +14,7 @@ defineProps<{
   fileType?: string
 }>()
 
+const env = useRuntimeConfig()
 const emit = defineEmits(['openModal'])
 
 const route = useRoute()
@@ -39,7 +40,7 @@ const calcPath = (d: string) => {
     <template v-else-if="type == 'file'">
       <component v-if="fileType" :is="getFileIcon(fileType)" />
       <FileIcon v-else />
-      <p class="truncate max-w-fit ml-2 mr-2">{{ name }}</p>
+      <a target="_blank" :href="`${env.public.api}/files/${id}/download`" class="truncate max-w-fit ml-2 mr-2 transition hover:text-blue-400 hover:underline">{{ name }}</a>
     </template>
 
     <template v-if="type == 'file'">

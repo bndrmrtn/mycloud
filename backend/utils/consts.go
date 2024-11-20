@@ -13,4 +13,9 @@ const (
 	RequestSpaceFileKey = "spaces.space_file_pointer"
 
 	WSUserID = "ws.user_id"
+
+	WSFileUploadEvent      = "space_file_upload"
+	WSFileDeleteEvent      = "space_file_delete"
+	WSFileUpdateEvent      = "space_file_update"
+	WSDownloadRequestEvent = "download_request"
 )

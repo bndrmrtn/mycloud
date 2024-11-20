@@ -38,6 +38,7 @@ func Api(store gale.SessionStore) gale.Config {
 			AcceptOptions: &websocket.AcceptOptions{
 				InsecureSkipVerify: true,
 			},
+			Timeout: 10 * time.Second,
 		},
 	}
 }
