@@ -7,6 +7,8 @@ import (
 	"github.com/bndrmrtn/go-gale"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
+	"github.com/bndrmrtn/my-cloud/handlers/dao"
+	"github.com/bndrmrtn/my-cloud/handlers/dto"
 	"github.com/bndrmrtn/my-cloud/services"
 	"github.com/bndrmrtn/my-cloud/utils"
 	"github.com/sirupsen/logrus"
@@ -112,9 +114,11 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 				return
 			}
 
-			_ = wsWriter(ws, userID, gale.Map{
-				"type": utils.WSFileUploadEvent,
-				"file": file,
+			_ = wsWriter(ws, userID, dto.WSEvent{
+				Event: utils.WSFileUploadEvent,
+				Data: dto.WSEventFileUploaded{
+					File: &file,
+				},
 			})
 		}()
 
@@ -122,6 +126,7 @@ func HandleUploadFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 	}
 }
 
+// HandleGetFile returns the file content
 func HandleGetFile(db *gorm.DB, svc services.StorageService) gale.HandlerFunc {
 	return func(c gale.Ctx) error {
 		file, err := ctxSpaceFile(c)
@@ -133,7 +138,10 @@ func HandleGetFile(db *gorm.DB, svc services.StorageService) gale.HandlerFunc {
 			return gale.NewError(http.StatusBadRequest, "file size exceeded the 5mb limit")
 		}
 
-		path := svc.GetRealPath(file.OSFile)
+		path, err := svc.GetRealPath(file.OSFile)
+		if err != nil {
+			return err
+		}
 
 		return c.ContentType(file.OSFile.Type).SendFile(path)
 	}
@@ -167,12 +175,16 @@ func HandleDeleteFile(db *gorm.DB, svc services.StorageService, ws gale.WSServer
 			return err
 		}
 
-		_ = wsWriter(ws, userID, gale.Map{
-			"type":    utils.WSFileDeleteEvent,
-			"file_id": file.ID,
+		_ = wsWriter(ws, userID, dto.WSEvent{
+			Event: utils.WSFileDeleteEvent,
+			Data: dto.WSEventFileDeleted{
+				FileID: file.ID,
+			},
 		})
 
-		return c.JSON(gale.Map{"message": "File deleted"})
+		return c.JSON(dto.Message{
+			Message: "File deleted successfully",
+		})
 	}
 }
 
@@ -183,10 +195,7 @@ func HandleUpdateFileInfo(db *gorm.DB, ws gale.WSServer) gale.HandlerFunc {
 			return err
 		}
 
-		var data struct {
-			Name      string `json:"name"`
-			Directory string `json:"directory"`
-		}
+		var data dao.FileUploadInformation
 
 		if err := c.Body().ParseJSON(&data); err != nil {
 			return err
@@ -215,9 +224,11 @@ func HandleUpdateFileInfo(db *gorm.DB, ws gale.WSServer) gale.HandlerFunc {
 		}
 
 		go func() {
-			_ = wsWriter(ws, file.UserID, gale.Map{
-				"type": utils.WSFileUpdateEvent,
-				"file": file,
+			_ = wsWriter(ws, file.UserID, dto.WSEvent{
+				Event: utils.WSFileUpdateEvent,
+				Data: dto.WSEventFileUploaded{
+					File: file,
+				},
 			})
 		}()
 
@@ -232,7 +243,10 @@ func HandleDownloadFile(db *gorm.DB, svc services.StorageService) gale.HandlerFu
 			return err
 		}
 
-		path := svc.GetRealPath(file.OSFile)
+		path, err := svc.GetRealPath(file.OSFile)
+		if err != nil {
+			return err
+		}
 
 		c.Header().Add("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", file.FileName))
 		c.Header().Add("Content-Type", "application/octet-stream")

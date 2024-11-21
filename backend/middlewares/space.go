@@ -6,13 +6,15 @@ import (
 	"github.com/bndrmrtn/go-gale"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
-	"github.com/bndrmrtn/my-cloud/permissions"
 	"github.com/bndrmrtn/my-cloud/utils"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-func SpaceMiddleware(db *gorm.DB, param string) gale.MiddlewareFunc {
+type PermissionChecker func(rdb *redis.Client, db *gorm.DB, user *models.User, fs *models.FileSpace) bool
+
+func SpaceMiddleware(rdb *redis.Client, db *gorm.DB, param string, permFn PermissionChecker) gale.MiddlewareFunc {
 	return func(c gale.Ctx) error {
 		defer logrus.Info("Middleware: SpaceMiddleware")
 
@@ -25,7 +27,7 @@ func SpaceMiddleware(db *gorm.DB, param string) gale.MiddlewareFunc {
 
 		// Check if user has access to the space
 		user := c.Get(utils.RequestAuthUserKey).(*models.User)
-		if !permissions.CanUserAccessSpace(db, user, &space) {
+		if !permFn(rdb, db, user, &space) {
 			return gale.NewError(http.StatusForbidden, "Forbidden")
 		}
 

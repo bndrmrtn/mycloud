@@ -17,7 +17,7 @@ type StorageService interface {
 	ReadFile(f *models.OSFile) ([]byte, error)
 
 	GetTmpDir() string
-	GetRealPath(f *models.OSFile) string
+	GetRealPath(f *models.OSFile) (string, error)
 
 	Containers() int
 }

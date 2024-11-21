@@ -11,6 +11,7 @@ import (
 	"github.com/bndrmrtn/go-gale"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
+	"github.com/bndrmrtn/my-cloud/handlers/dto"
 	"github.com/bndrmrtn/my-cloud/services"
 	"github.com/bndrmrtn/my-cloud/utils"
 	"github.com/google/uuid"
@@ -60,20 +61,20 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws gale.WSServe
 				var f []byte
 				f, err = svc.ReadFile(file.OSFile)
 				if err != nil {
-					logrus.Fatal("Failed to read file", err)
+					logrus.Error("Failed to read file", err)
 					return
 				}
 
 				var fw io.Writer
 				fw, err = zw.Create(filepath.Join(file.Directory, file.FileName))
 				if err != nil {
-					logrus.Fatal("Failed to create zip file", err)
+					logrus.Error("Failed to create zip file", err)
 					return
 				}
 
 				_, err = fw.Write(f)
 				if err != nil {
-					logrus.Fatal("Failed to write to zip file", err)
+					logrus.Error("Failed to write to zip file", err)
 					return
 				}
 			}
@@ -96,17 +97,19 @@ func HandleDownloadDir(db *gorm.DB, svc services.StorageService, ws gale.WSServe
 				return
 			}
 
-			err = wsWriter(ws, userID, gale.Map{
-				"type":            utils.WSDownloadRequestEvent,
-				"request_id":      reqID,
-				"download_id":     download.ID,
-				"download_expiry": download.Expiry,
+			err = wsWriter(ws, userID, dto.WSEvent{
+				Event: utils.WSDownloadRequestEvent,
+				Data: dto.WSEventDownloadPreparedData{
+					RequestID:      reqID,
+					DownloadID:     download.ID,
+					DownloadExpiry: download.Expiry,
+				},
 			})
 		}(db, ws, filepath.Join(svc.GetTmpDir(), uuid.New().String()+".zip"), space.ID, userID, queryPath(c), c.ID())
 
-		return c.Status(http.StatusAccepted).JSON(gale.Map{
-			"accapted":   true,
-			"request_id": c.ID(),
+		return c.Status(http.StatusAccepted).JSON(dto.DownloadRequestAccepted{
+			Accapted:  true,
+			RequestID: c.ID(),
 		})
 	}
 }

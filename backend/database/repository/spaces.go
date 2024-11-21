@@ -13,13 +13,15 @@ func GetAllSpacesForUser(db *gorm.DB, userID string) ([]models.FileSpaceWithSize
 			file_spaces.created_at as created_at,
 			file_spaces.updated_at as updated_at,
 			file_spaces.name as name,
-			sum(os_files.file_size) as size
+			sum(os_files.file_size) as size,
+			space_user.user_id as space_user_id
 		from file_spaces
-		left join files on files.file_space_id = file_spaces.id
-		left join os_files on os_files.id = files.os_file_id
-		where file_spaces.user_id = ?
-		group by file_spaces.id
-	`, userID).Find(&spaces)
+			left join files on files.file_space_id = file_spaces.id
+			left join os_files on os_files.id = files.os_file_id
+			left join space_user on space_user.file_space_id = file_spaces.id
+			where file_spaces.user_id = ? or space_user.user_id = ?
+			group by file_spaces.id, space_user.user_id
+	`, userID, userID).Find(&spaces)
 	return spaces, result.Error
 }
 

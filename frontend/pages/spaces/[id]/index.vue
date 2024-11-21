@@ -65,19 +65,36 @@ const fetchSpaceFiles = async () => {
 const event = useEventStore()
 
 onMounted(async () => {
+  const helpDir = (d: string) => {
+    const currentDir = (dir() == '/' ? '' : dir()) + '/'
+    if(!d.startsWith(currentDir)) return
+    const newDir = d.substring(currentDir.length).split('/')[0]
+    if(newDir && !dirs.value.includes(newDir)) dirs.value.push(newDir)
+  }
+
   event.register('space_file_update', 'update-fs', (data: Record<string, any>): void => {
     const fileData = (data as {file: SpaceFile}).file
+    helpDir(fileData.directory)
+    // Check if the file is in the current directory
+    if(fileData.directory != dir()) {
+      files.value = files.value.filter(file => file.id != fileData.id)
+      return
+    }
+    // Update the file
     const index = files.value.findIndex(file => file.id === fileData.id)
     if(index != -1) files.value[index] = fileData
   })
 
   event.register('space_file_delete', 'delete-fs', (data: Record<string, any>): void => {
+    // Delete the file from the list
     const id = data['file_id'] as string
     files.value = files.value.filter(file => file.id != id)
   })
 
   event.register('space_file_upload', 'upload-fs', (data: Record<string, any>): void => {
+    // Add the file to the list if it's in the current directory
     const fileData = (data as {file: SpaceFile}).file
+    helpDir(fileData.directory)
     if(fileData?.directory == dir()) files.value.push(fileData)
   })
 

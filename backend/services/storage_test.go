@@ -1,11 +1,11 @@
 package services
 
 import (
+	"bytes"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -68,27 +68,24 @@ func Test_StorageFileOperations(t *testing.T) {
 }
 
 func Test_GetFileRealPath(t *testing.T) {
+	// Create a temporary database and directory for testing
+	mockDB, err := setupTestDB()
+	if err != nil {
+		t.Fatal("error setting up test db", err)
+	}
 	// Create a temporary directory for testing
 	tempDir := t.TempDir()
 
 	// Create a new storage service
-	storageService, err := NewStorageServiceV1(tempDir, nil, 1024*utils.MB, 100)
+	storageService, err := NewStorageServiceV1(tempDir, mockDB, 1024*utils.MB, 100)
 	// Check if the storage service is created without error
 	assert.Nil(t, err, "storage service should be created without error")
 	assert.NotNil(t, storageService, "storage service should not be nil")
 
-	var (
-		fileID    = "test-file-id"
-		container = "container0"
-	)
+	osFile, err := storageService.Store(bytes.NewReader([]byte("test")), 4, ".txt")
+	assert.Nil(t, err, "osFile should be returned without error")
 
-	osFile := &models.OSFile{
-		Base: models.Base{
-			ID: fileID,
-		},
-		Container: container,
-	}
-
-	realPath := storageService.GetRealPath(osFile)
-	assert.Equal(t, filepath.Join(tempDir, container, fileID), realPath, "real path should be the same as the expected path")
+	realPath, err := storageService.GetRealPath(osFile)
+	assert.Nil(t, err, "real path should be retrieved without error")
+	assert.Equal(t, filepath.Join(tempDir, osFile.Container, osFile.ID), realPath, "real path should be the same as the expected path")
 }

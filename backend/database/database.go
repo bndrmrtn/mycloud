@@ -33,6 +33,7 @@ func New(loglevel logger.LogLevel) (*gorm.DB, error) {
 		&models.ImageURL{},
 		&models.UserWhitelist{},
 		&models.UserBlacklist{},
+		&models.SpaceUser{},
 	)
 
 	if err != nil {

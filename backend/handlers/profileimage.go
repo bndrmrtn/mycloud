@@ -21,7 +21,11 @@ func HandleGetProfileImage(db *gorm.DB, svc services.StorageService, store gale.
 			return err
 		}
 
-		path := svc.GetRealPath(img.OSFile)
+		path, err := svc.GetRealPath(img.OSFile)
+		if err != nil {
+			return err
+		}
+
 		_ = store.Set("image:"+id, []byte(path))
 		return c.SendFile(path)
 	}

@@ -8,11 +8,13 @@ import (
 	"github.com/bndrmrtn/my-cloud/config"
 	"github.com/bndrmrtn/my-cloud/handlers"
 	"github.com/bndrmrtn/my-cloud/middlewares"
+	"github.com/bndrmrtn/my-cloud/permissions"
 	"github.com/bndrmrtn/my-cloud/services"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
-func NewApiServer(appConf *config.AppConfig, db *gorm.DB, store gale.SessionStore, svc services.StorageService) *gale.Gale {
+func NewApiServer(appConf *config.AppConfig, db *gorm.DB, rdb *redis.Client, store gale.SessionStore, svc services.StorageService) *gale.Gale {
 	conf := config.Api(store)
 	conf.Mode = config.Mode()
 
@@ -24,7 +26,7 @@ func NewApiServer(appConf *config.AppConfig, db *gorm.DB, store gale.SessionStor
 	// Changed to a hook to run on every request
 	app.Hook(gale.EveryRequestHook, middlewares.CORSMiddleware)
 
-	registerRoutes(app, appConf, db, store, svc, ws)
+	registerRoutes(app, appConf, db, rdb, store, svc, ws)
 
 	if conf.Mode == gale.Development {
 		// Add devtools in development mode
@@ -38,7 +40,7 @@ func NewApiServer(appConf *config.AppConfig, db *gorm.DB, store gale.SessionStor
 	return app
 }
 
-func registerRoutes(r gale.Router, conf *config.AppConfig, db *gorm.DB, store gale.SessionStore, svc services.StorageService, ws gale.WSServer) {
+func registerRoutes(r gale.Router, conf *config.AppConfig, db *gorm.DB, rdb *redis.Client, store gale.SessionStore, svc services.StorageService, ws gale.WSServer) {
 	r.Get("/", handlers.HandleIndexRoute(conf)).Name("index")
 
 	r.Get("/auth-redirect", handlers.HandleCreateAuthURL).Name("auth.redirect")
@@ -57,24 +59,26 @@ func registerRoutes(r gale.Router, conf *config.AppConfig, db *gorm.DB, store ga
 	}
 
 	// Manage file spaces
-	spaces := auth.Group("/spaces/{space_id@uuid}", middlewares.SpaceMiddleware(db, "space_id"))
+	spacesUnsafe := auth.Group("/spaces/{space_id@uuid}")
+	spaces := spacesUnsafe.Group("/", middlewares.SpaceMiddleware(rdb, db, "space_id", permissions.CanUserAccessSpace))
 	{
 		spaces.Get("/", handlers.HandleGetSpace(db)).Name("spaces.get")
 		spaces.Get("/fs", handlers.HandleGetFS(db))
 
 		spaces.Get("/files", handlers.HandleGetFiles(db)).Name("spaces.files")
 
-		spaces.Post("/upload", handlers.HandleUploadFile(db, svc, ws)).Name("spaces.upload")
-		spaces.Get("/download", handlers.HandleDownloadDir(db, svc, ws)).Name("spaces.download")
+		spacesUnsafe.Post("/upload", handlers.HandleUploadFile(db, svc, ws), middlewares.SpaceMiddleware(rdb, db, "space_id", permissions.CanUserUploadFile)).Name("spaces.upload")
+		spacesUnsafe.Get("/download", handlers.HandleDownloadDir(db, svc, ws), middlewares.SpaceMiddleware(rdb, db, "space_id", permissions.CanUserReadFile)).Name("spaces.download")
 	}
 
 	// Manage files in a space
-	files := auth.Group("/files/{file_id@uuid}", middlewares.FileMiddleware(db, "file_id"))
+	filesUnsafe := auth.Group("/files/{file_id@uuid}")
+	filesRead := filesUnsafe.Group("/", middlewares.FileMiddleware(rdb, db, "file_id"))
 	{
-		files.Get("/", handlers.HandleGetFile(db, svc)).Name("files.get")
-		files.Delete("/", handlers.HandleDeleteFile(db, svc, ws)).Name("files.delete")
-		files.Put("/", handlers.HandleUpdateFileInfo(db, ws)).Name("files.update")
-		files.Get("/download", handlers.HandleDownloadFile(db, svc))
+		filesRead.Get("/", handlers.HandleGetFile(db, svc)).Name("files.get")
+		filesUnsafe.Delete("/", handlers.HandleDeleteFile(db, svc, ws)).Name("files.delete")
+		filesUnsafe.Put("/", handlers.HandleUpdateFileInfo(db, ws)).Name("files.update")
+		filesRead.Get("/download", handlers.HandleDownloadFile(db, svc))
 	}
 
 	admin := auth.Group("/admin", middlewares.AdminMiddleware(db))

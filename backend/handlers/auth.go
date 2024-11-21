@@ -11,6 +11,7 @@ import (
 	"github.com/bndrmrtn/my-cloud/config"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
+	"github.com/bndrmrtn/my-cloud/handlers/dto"
 	"github.com/bndrmrtn/my-cloud/services"
 	"github.com/bndrmrtn/my-cloud/utils"
 	log "github.com/sirupsen/logrus"
@@ -63,13 +64,13 @@ func HandleAuthUser(db *gorm.DB, svc services.StorageService, authConf *config.A
 		go func() {
 			err = updateUserImage(db, svc, userData.Picture, user)
 			if err != nil {
-				log.Warn("Failed to update user image")
+				log.Warn("Failed to update user image:", err)
 			}
 		}()
 
-		return c.JSON(gale.Map{
-			"user":    user,
-			"session": session,
+		return c.JSON(dto.UserSession{
+			User:    user,
+			Session: &session,
 		})
 	}
 }

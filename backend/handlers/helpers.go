@@ -49,6 +49,7 @@ func ctxSpaceFile(c gale.Ctx) (*models.File, error) {
 	return nil, gale.NewError(http.StatusNotFound, "File not found")
 }
 
+// TODO: Send realtime events to all users in the same space (even participants)
 func wsWriter(ws gale.WSServer, userID string, data any) error {
 	b, err := json.Marshal(data)
 	if err != nil {

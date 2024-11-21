@@ -16,9 +16,3 @@ func FindFileByID(db *gorm.DB, id string) (models.File, error) {
 	result := db.Where("id = ?", id).Preload("OSFile").First(&file)
 	return file, result.Error
 }
-
-func CanUserAccessFile(db *gorm.DB, userID, fileID string) (bool, error) {
-	var count int64
-	result := db.Model(&models.File{}).Joins("JOIN file_spaces ON file_spaces.id = files.file_space_id").Where("files.id = ? and file_spaces.user_id = ?", fileID, userID).Count(&count)
-	return count > 0, result.Error
-}

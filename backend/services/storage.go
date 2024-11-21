@@ -84,34 +84,45 @@ func (s *StorageServiceV1) StoreMultipartFile(f *multipart.FileHeader) (*models.
 }
 
 func (s *StorageServiceV1) Store(r io.Reader, size int64, ext string) (*models.OSFile, error) {
+	// Read file data
 	data, err := io.ReadAll(r)
 	if err != nil {
 		return nil, err
 	}
 
+	// Compute hash to avoid duplicates
 	sum := md5.Sum(data)
 	hash := hex.EncodeToString(sum[:])
 
+	// Check if the file already exists
 	hFile, err := repository.FindOSFileByHash(s.db, hash)
 	if err == nil {
 		return hFile, nil
 	}
 
+	// Create a new file
 	var file models.OSFile
+
 	file.Extension = filepath.Ext(ext)
 	file.Type = mime.TypeByExtension(file.Extension)
 	file.FileSize = size
 	file.Container, err = s.findContainer(size)
 	file.ContentHash = hash
+	// TODO: Detech charset for text files
+
 	if err != nil {
 		return nil, err
 	}
 
+	// Save the file to create an ID for it
 	if err = s.db.Create(&file).Error; err != nil {
 		return nil, err
 	}
 
+	// Write the file to the disk
 	if err := os.WriteFile(filepath.Join(s.datadir, file.Container, file.ID), data, os.ModePerm); err != nil {
+		// Rollback the file creation
+		_ = s.Delete(&file)
 		return nil, err
 	}
 
@@ -153,8 +164,12 @@ func (s *StorageServiceV1) ReadFile(f *models.OSFile) ([]byte, error) {
 	return os.ReadFile(filepath.Join(s.datadir, f.Container, f.ID))
 }
 
-func (s *StorageServiceV1) GetRealPath(f *models.OSFile) string {
-	return filepath.Join(s.datadir, f.Container, f.ID)
+func (s *StorageServiceV1) GetRealPath(f *models.OSFile) (string, error) {
+	path := filepath.Join(s.datadir, f.Container, f.ID)
+	if _, err := os.Stat(path); err != nil {
+		return "", err
+	}
+	return path, nil
 }
 
 func (s *StorageServiceV1) Containers() int {

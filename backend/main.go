@@ -33,7 +33,8 @@ func main() {
 	}
 
 	// Create the redis session store
-	store := implementations.NewRedisSessionStore(context.Background(), database.NewRedisClient())
+	redis := database.NewRedisClient()
+	store := implementations.NewRedisSessionStore(context.Background(), redis)
 
 	// Create the storage service
 	sizeLimit, fileLimit := config.Containers()
@@ -43,7 +44,7 @@ func main() {
 	}
 
 	// Create the API server
-	api := NewApiServer(conf, db, store, svc)
+	api := NewApiServer(conf, db, redis, store, svc)
 
 	// Start the API server
 	log.Fatal(api.Serve(*listenAddr))
