@@ -4,15 +4,15 @@
 @import './modified/toast.css';
 
 svg {
-     display: inline-block;
+  display: inline-block;
 }
 
 .svg-icon {
-     @apply w-4 h-5 inline-block;
+  @apply w-4 h-5 inline-block;
 }
 
 *:focus {
-     outline: none;
+  outline: none;
 }
 
 input:-webkit-autofill,
@@ -24,15 +24,14 @@ textarea:-webkit-autofill:focus,
 select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus {
-     background: #282c4f;
-     @apply bg-input border-emerald-400;
+  background: #282c4f;
+  @apply bg-input border-emerald-400;
 }
 
-
 .no-select {
-     -webkit-touch-callout: none;
-     -webkit-user-select: none;
-     -moz-user-select: none;
-     -ms-user-select: none;
-     user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }

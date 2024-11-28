@@ -1,24 +1,24 @@
-/* From Uiverse.io by milegelu */ 
+/* From Uiverse.io by milegelu */
 .bg-square {
-     --gap: 5em;
-     --line: 1px;
-     --color: rgba(255, 255, 255, 0.2);
-   
-     background-image: linear-gradient(
-         -90deg,
-         transparent calc(var(--gap) - var(--line)),
-         var(--color) calc(var(--gap) - var(--line) + 1px),
-         var(--color) var(--gap)
-       ),
-       linear-gradient(
-         0deg,
-         transparent calc(var(--gap) - var(--line)),
-         var(--color) calc(var(--gap) - var(--line) + 1px),
-         var(--color) var(--gap)
-       );
-     background-size: var(--gap) var(--gap);
+  --gap: 5em;
+  --line: 1px;
+  --color: rgba(255, 255, 255, 0.2);
+
+  background-image: linear-gradient(
+      -90deg,
+      transparent calc(var(--gap) - var(--line)),
+      var(--color) calc(var(--gap) - var(--line) + 1px),
+      var(--color) var(--gap)
+    ),
+    linear-gradient(
+      0deg,
+      transparent calc(var(--gap) - var(--line)),
+      var(--color) calc(var(--gap) - var(--line) + 1px),
+      var(--color) var(--gap)
+    );
+  background-size: var(--gap) var(--gap);
 }
 
 .bg-blur {
-    @apply bg-opacity-60 backdrop-blur
+  @apply bg-opacity-60 backdrop-blur;
 }

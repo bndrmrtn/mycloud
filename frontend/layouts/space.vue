@@ -9,6 +9,6 @@
 
 <script setup lang="ts">
 defineProps<{
-  hideNav?: boolean
-}>()
+  hideNav?: boolean;
+}>();
 </script>

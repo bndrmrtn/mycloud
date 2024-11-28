@@ -1,9 +1,9 @@
 <script setup lang="ts">
 defineProps<{
-  request_id: string
-}>()
+  request_id: string;
+}>();
 
-const emit = defineEmits(['move'])
+const emit = defineEmits(['move']);
 </script>
 
 <template>

@@ -1,20 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap');
 
 .inter {
-     font-family: "Inter", sans-serif;
-     font-optical-sizing: auto;
-     font-weight: 400;
-     font-style: normal;
+  font-family: 'Inter', sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
 
 @font-face {
-    font-family: 'Fredoka One';
-    font-style: normal;
-    font-weight: 400;
-    font-display: swap;
-    src: url(../fonts/fredoka-one.woff2) format('woff2');
+  font-family: 'Fredoka One';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(../fonts/fredoka-one.woff2) format('woff2');
 }
 
 .fredoka {
-    font-family: Fredoka One, cursive !important;
+  font-family:
+    Fredoka One,
+    cursive !important;
 }
