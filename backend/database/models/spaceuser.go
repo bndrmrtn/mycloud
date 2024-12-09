@@ -65,8 +65,8 @@ func (s *SpaceUser) EncodePermissions() {
 func (s *SpaceUser) DecodePermissions() {
 	s.Permission = &SpaceUserPermission{}
 
-	s.Permission.ReadFile = s.PermissionInt&ReadFileBit != 0
-	s.Permission.UpdateFile = s.PermissionInt&UpdateFileBit != 0
-	s.Permission.DeleteFile = s.PermissionInt&DeleteFileBit != 0
 	s.Permission.UploadFile = s.PermissionInt&UploadFileBit != 0
+	s.Permission.DeleteFile = s.PermissionInt&DeleteFileBit != 0
+	s.Permission.UpdateFile = s.PermissionInt&UpdateFileBit != 0
+	s.Permission.ReadFile = s.PermissionInt&ReadFileBit != 0
 }

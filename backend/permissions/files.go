@@ -9,17 +9,30 @@ import (
 )
 
 func CanUserAccessFile(rdb *redis.Client, db *gorm.DB, user *models.User, file *models.File) bool {
-	var key = fmt.Sprintf("permission:file.read:%s-%s", user.ID, file.ID)
+	var key = fmt.Sprintf(FileReadFormat, user.ID, file.ID)
+	return checkFilePerm(db, rdb, key, user.ID, file, models.ReadFileBit)
+}
+
+func CanUserDeleteFile(rdb *redis.Client, db *gorm.DB, user *models.User, file *models.File) bool {
+	var key = fmt.Sprintf(FileDeleteFormat, user.ID, file.ID)
+	return checkFilePerm(db, rdb, key, user.ID, file, models.DeleteFileBit)
+}
+
+func CanUserUpdateFile(rdb *redis.Client, db *gorm.DB, user *models.User, file *models.File) bool {
+	var key = fmt.Sprintf(FileUpdateFormat, user.ID, file.ID)
+	return checkFilePerm(db, rdb, key, user.ID, file, models.UpdateFileBit)
+}
+
+func checkFilePerm(db *gorm.DB, rdb *redis.Client, key string, userID string, file *models.File, bit int) bool {
+	if userID == file.UserID {
+		// No need to cache this, the user is the owner of the file
+		return true
+	}
 
 	// Check if the cache has the value
 	ok, err := redisBoolReturn(rdb, key)
 	if err == nil {
 		return ok
-	}
-
-	if user.ID == file.UserID {
-		// No need to cache this, the user is the owner of the file
-		return true
 	}
 
 	var can bool
@@ -34,7 +47,7 @@ func CanUserAccessFile(rdb *redis.Client, db *gorm.DB, user *models.User, file *
 				OR (space_user.user_id = ? AND (space_user.permission_int & ? != 0))
 			)
 		)`,
-		file.ID, user.ID, user.ID, models.ReadFileBit).Scan(&can)
+		file.ID, userID, userID, bit).Scan(&can)
 
 	if result.Error != nil {
 		return false

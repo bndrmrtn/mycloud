@@ -6,14 +6,15 @@ import (
 	"github.com/bndrmrtn/go-gale"
 	"github.com/bndrmrtn/my-cloud/database/models"
 	"github.com/bndrmrtn/my-cloud/database/repository"
-	"github.com/bndrmrtn/my-cloud/permissions"
 	"github.com/bndrmrtn/my-cloud/utils"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 	"gorm.io/gorm"
 )
 
-func FileMiddleware(rdb *redis.Client, db *gorm.DB, param string) gale.MiddlewareFunc {
+type FileChecker func(rdb *redis.Client, db *gorm.DB, user *models.User, file *models.File) bool
+
+func FileMiddleware(rdb *redis.Client, db *gorm.DB, param string, permFn FileChecker) gale.MiddlewareFunc {
 	return func(c gale.Ctx) error {
 		defer logrus.Info("Middleware: FileMiddleware")
 
@@ -26,7 +27,7 @@ func FileMiddleware(rdb *redis.Client, db *gorm.DB, param string) gale.Middlewar
 
 		user := c.Get(utils.RequestAuthUserKey).(*models.User)
 
-		if !permissions.CanUserAccessFile(rdb, db, user, &file) {
+		if !permFn(rdb, db, user, &file) {
 			return gale.NewError(http.StatusForbidden, "Forbidden")
 		}
 

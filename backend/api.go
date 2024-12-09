@@ -63,7 +63,10 @@ func registerRoutes(r gale.Router, conf *config.AppConfig, db *gorm.DB, rdb *red
 	spaces := spacesUnsafe.Group("/", middlewares.SpaceMiddleware(rdb, db, "space_id", permissions.CanUserAccessSpace))
 	{
 		spaces.Get("/", handlers.HandleGetSpace(db)).Name("spaces.get")
-		spaces.Get("/fs", handlers.HandleGetFS(db))
+		spaces.Get("/fs", handlers.HandleGetFS(db)).Name("spaces.fs")
+		spaces.Get("/collaborators", handlers.HandleGetCollaborators(db)).Name("spaces.collaborators")
+
+		spaces.Put("/collaborators", handlers.HandleUpdateCollaborator(db, rdb))
 
 		spaces.Get("/files", handlers.HandleGetFiles(db)).Name("spaces.files")
 
@@ -73,12 +76,14 @@ func registerRoutes(r gale.Router, conf *config.AppConfig, db *gorm.DB, rdb *red
 
 	// Manage files in a space
 	filesUnsafe := auth.Group("/files/{file_id@uuid}")
-	filesRead := filesUnsafe.Group("/", middlewares.FileMiddleware(rdb, db, "file_id"))
+	fileAccess := filesUnsafe.Group("/", middlewares.FileMiddleware(rdb, db, "file_id", permissions.CanUserAccessFile))
+	fileDelete := filesUnsafe.Group("/", middlewares.FileMiddleware(rdb, db, "file_id", permissions.CanUserDeleteFile))
+	fileUpdate := filesUnsafe.Group("/", middlewares.FileMiddleware(rdb, db, "file_id", permissions.CanUserUpdateFile))
 	{
-		filesRead.Get("/", handlers.HandleGetFile(db, svc)).Name("files.get")
-		filesUnsafe.Delete("/", handlers.HandleDeleteFile(db, svc, ws)).Name("files.delete")
-		filesUnsafe.Put("/", handlers.HandleUpdateFileInfo(db, ws)).Name("files.update")
-		filesRead.Get("/download", handlers.HandleDownloadFile(db, svc))
+		fileAccess.Get("/", handlers.HandleGetFile(db, svc)).Name("files.get")
+		fileDelete.Delete("/", handlers.HandleDeleteFile(db, svc, ws)).Name("files.delete")
+		fileUpdate.Put("/", handlers.HandleUpdateFileInfo(db, ws)).Name("files.update")
+		fileAccess.Get("/download", handlers.HandleDownloadFile(db, svc))
 	}
 
 	admin := auth.Group("/admin", middlewares.AdminMiddleware(db))

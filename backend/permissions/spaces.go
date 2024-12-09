@@ -9,7 +9,7 @@ import (
 )
 
 func CanUserAccessSpace(rdb *redis.Client, db *gorm.DB, user *models.User, space *models.FileSpace) bool {
-	var key = fmt.Sprintf("permission:space:%s-%s", user.ID, space.ID)
+	var key = fmt.Sprintf(SpaceAccessFormat, user.ID, space.ID)
 
 	// Check if the cache has the value
 	ok, err := redisBoolReturn(rdb, key)
@@ -26,7 +26,7 @@ func CanUserAccessSpace(rdb *redis.Client, db *gorm.DB, user *models.User, space
 }
 
 func CanUserUploadFile(rdb *redis.Client, db *gorm.DB, user *models.User, space *models.FileSpace) bool {
-	var key = fmt.Sprintf("permission:space.create:%s-%s", user.ID, space.ID)
+	var key = fmt.Sprintf(SpaceFileUploadFormat, user.ID, space.ID)
 
 	// Check if the cache has the value
 	ok, err := redisBoolReturn(rdb, key)
@@ -47,7 +47,7 @@ func CanUserUploadFile(rdb *redis.Client, db *gorm.DB, user *models.User, space 
 }
 
 func CanUserReadFile(rdb *redis.Client, db *gorm.DB, user *models.User, space *models.FileSpace) bool {
-	var key = fmt.Sprintf("permission:space.read:%s-%s", user.ID, space.ID)
+	var key = fmt.Sprintf(SpaceReadFormat, user.ID, space.ID)
 
 	// Check if the cache has the value
 	ok, err := redisBoolReturn(rdb, key)

@@ -84,3 +84,15 @@ func GetSpaceFS(db *gorm.DB, spaceID string, dir string) ([]string, error) {
 
 	return directories, result.Error
 }
+
+func GetSpaceCollaborators(db *gorm.DB, spaceID string) ([]models.SpaceUser, error) {
+	var collaborators []models.SpaceUser
+	result := db.Model(&models.SpaceUser{}).InnerJoins("User").InnerJoins("FileSpace").Where("FileSpace.id = ?", spaceID).Find(&collaborators)
+	return collaborators, result.Error
+}
+
+func FindSpaceCollaborator(db *gorm.DB, spaceID, userID string) (models.SpaceUser, error) {
+	var collaborator models.SpaceUser
+	result := db.Model(&models.SpaceUser{}).Where("file_space_id = ? and user_id = ?", spaceID, userID).First(&collaborator)
+	return collaborator, result.Error
+}

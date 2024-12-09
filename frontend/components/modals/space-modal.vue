@@ -6,7 +6,7 @@
       Download directory ({{ dir() }})
     </ButtonsButtonPinkle>
 
-    <ButtonsButtonPinkle class="my-1">
+    <ButtonsButtonPinkle class="my-1" :to="`/spaces/${route.params.id as string}/collaborators`">
       Manage collaborators
     </ButtonsButtonPinkle>
   </ModalUtil>
@@ -18,6 +18,7 @@ defineProps<{
   dir: () => string;
 }>();
 
+const route = useRoute()
 const emit = defineEmits(['close', 'download']);
 
 const download = () => {

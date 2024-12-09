@@ -1,4 +1,4 @@
-# MyCloud config - Read more: https://cloud.mrtn.vip/docs/config
+# MyCloud Config - Read more: https://cloud.mrtn.vip/docs/config
 service:
   version: "1"
   appdata_dir: "mycloud-appdata"
