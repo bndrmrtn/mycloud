@@ -1,4 +1,3 @@
-import type {Space} from "~/types/space";
 import {newRequest} from "~/scripts/request";
 import type {Collaborator} from "~/types/user";
 

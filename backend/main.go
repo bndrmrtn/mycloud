@@ -5,8 +5,6 @@ import (
 	"flag"
 	"log"
 
-	_ "net/http/pprof"
-
 	"github.com/bndrmrtn/my-cloud/config"
 	"github.com/bndrmrtn/my-cloud/database"
 	"github.com/bndrmrtn/my-cloud/implementations"

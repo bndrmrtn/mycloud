@@ -8,6 +8,8 @@ RUN go mod download
 
 COPY . .
 
+RUN cp /app/config.yaml /app/config.file || cp /app/config.yml /app/config.file
+
 RUN go build -o bin/mycloud
 
 # Run the tests
@@ -20,6 +22,6 @@ FROM alpine:latest AS run
 WORKDIR /app
 
 COPY --from=build /app/bin /app
-COPY --from=build /app/config.yaml /app/config.yaml
+COPY --from=build /app/config.file /app/config.yaml
 
 CMD ["./mycloud", "-"]

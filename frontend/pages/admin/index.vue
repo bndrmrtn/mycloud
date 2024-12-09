@@ -26,7 +26,7 @@ onMounted(async () => {
   <SpaceLayout>
     <h1 class="fredoka text-3xl mb-5">Admin dashboard</h1>
     <section v-if="conf">
-      <div class="grid grid-cols-2 gap-4">
+      <div class="md:grid md:grid-cols-2 md:gap-4">
         <div>
           <h2 class="fredoka text-2xl mb-5">Configuration</h2>
           <div class="mt-2 bg-widget p-2 rounded-lg">
@@ -54,7 +54,7 @@ onMounted(async () => {
             </p>
           </div>
         </div>
-        <div>
+        <div class="mt-2 md:mt-0">
           <h2 class="fredoka text-2xl mb-5">Manage</h2>
           <div class="mt-2 p-2">
             <ButtonsButtonBluish class="mb-2" to="/admin/users">
@@ -75,6 +75,9 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+    </section>
+    <section class="mt-3">
+      <admin-analytics/>
     </section>
   </SpaceLayout>
 </template>

@@ -69,3 +69,15 @@ func HandleAdminGetBlacklist(db *gorm.DB) gale.HandlerFunc {
 		return c.JSON(data)
 	}
 }
+
+func HandleAdminGetAnalytics(db *gorm.DB) gale.HandlerFunc {
+	return func(c gale.Ctx) error {
+		osFilesContainer, _ := repository.GetOSFilesSeparatedByContainers(db)
+		osFileSizeDiff, _ := repository.GetSizeDiff(db)
+
+		return c.JSON(gale.Map{
+			"os_file_container": osFilesContainer,
+			"file_difference":   osFileSizeDiff,
+		})
+	}
+}

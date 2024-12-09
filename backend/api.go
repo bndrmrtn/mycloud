@@ -31,8 +31,6 @@ func NewApiServer(appConf *config.AppConfig, db *gorm.DB, rdb *redis.Client, sto
 	if conf.Mode == gale.Development {
 		// Add devtools in development mode
 		app.Use(gale.NewUIDevtools())
-		// Register pprof routes
-		middlewares.RegisterPprof(app.Router())
 		// Dump the routes in development mode
 		app.Dump()
 	}
@@ -100,6 +98,8 @@ func registerRoutes(r gale.Router, conf *config.AppConfig, db *gorm.DB, rdb *red
 	if conf.Application.Authorization.UseBlacklist {
 		admin.Get("/blacklist", handlers.HandleAdminGetBlacklist(db))
 	}
+
+	admin.Get("/analytics", handlers.HandleAdminGetAnalytics(db))
 }
 
 func registerValidators(r gale.RouterParamValidator) {
