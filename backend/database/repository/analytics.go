@@ -10,7 +10,7 @@ type ContainerWithSize struct {
 func GetOSFilesSeparatedByContainers(db *gorm.DB) ([]*ContainerWithSize, error) {
 	var files []*ContainerWithSize
 
-	result := db.Raw(`select container, file_size as size from os_files group by container`).Scan(&files)
+	result := db.Raw(`select container, sum(file_size) as size from os_files group by container`).Scan(&files)
 	return files, result.Error
 }
 
