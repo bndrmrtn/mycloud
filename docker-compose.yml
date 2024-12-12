@@ -41,6 +41,8 @@ services:
     depends_on:
       database:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     container_name: mycloud-api
     restart: always
     env_file:
